@@ -16,9 +16,9 @@ Desarrollo de un trabajo de investigación sobre estimaciones de evapotranspirac
 Aplicacion con imágenes satelitales Landsat 8.
 
 ## Visualización 📓
-Mediante el visor de libretas Jupyter `nbviewer`, usando el siguiente [link](https://nbviewer.jupyter.org/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/jupyter_notebook/Inv_Arroz_METRIC.ipynb).
-
-o también aquí:    <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/jupyter_notebook/Inv_Arroz_METRIC.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+Dos opciones:
+- Visor de libretas Jupyter `nbviewer`, usando el siguiente [link](https://nbviewer.jupyter.org/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/jupyter_notebook/Inv_Arroz_METRIC.ipynb).
+- Google Colab - <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/jupyter_notebook/Inv_Arroz_METRIC.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> (recomendable).
 
 ## Licencia/License ⚖️
 MIT License - Copyright (c) 2021 Cesar Francisco Vilca Gamarra
