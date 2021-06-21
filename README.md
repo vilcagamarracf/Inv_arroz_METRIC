@@ -8,7 +8,7 @@
 
 <img src="figures/Region_of_Interest.PNG" alt="Zona de trabajo" align='right' width=300/>
 
-## Descripción 
+## Descripción :ear_of_rice:
 Desarrollo de un trabajo de investigación sobre estimaciones de evapotranspiración en cultivos de arroz usando el modelo METRIC basado la ecuación de balance de energia. 
 Aplicacion con imágenes satelitales Landsat 8.
 
