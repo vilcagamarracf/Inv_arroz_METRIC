@@ -1,4 +1,10 @@
-# ESTIMACIÓN DE EVAPOTRANSPIRACIÓN DE CULTIVOS DE ARROZ USANDO EL MODELO METRIC ☀️
+<h1 align="center"> ESTIMACIÓN DE EVAPOTRANSPIRACIÓN DE CULTIVOS DE ARROZ USANDO EL MODELO METRIC ☀️</h1>
+<h4 align="center"> Aplicación de Hidrología usando Python</h4>
+
+<p align='center'>
+   <img src="https://img.shields.io/github/last-commit/vilcagamarracf/Inv_arroz_METRIC?style=flat-square" alt="GitHub last commit"/>
+</p>
+
 
 <img src="figures/Region_of_Interest.PNG" alt="Zona de trabajo" align='right' width=300/>
 
@@ -6,8 +12,6 @@
 Desarrollo de un trabajo de investigación sobre estimaciones de evapotranspiración en cultivos de arroz usando el modelo METRIC basado la ecuación de balance de energia. 
 Aplicacion con imágenes satelitales Landsat 8.
 
-## Actividad 
-<img src="https://img.shields.io/github/last-commit/vilcagamarracf/Inv_arroz_METRIC?style=flat-square" alt="GitHub last commit"/>
 
 ## Visualización 📓
 Dos opciones:
