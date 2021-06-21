@@ -21,3 +21,7 @@ Dos opciones:
 ## Licencia/License ⚖️
 MIT License - Copyright (c) 2021 Cesar Francisco Vilca Gamarra \
 Mayor información [aquí](https://github.com/vilcagamarracf/Inv_arroz_METRIC/blob/main/LICENSE)
+
+> &nbsp;&middot;&nbsp; Website [vilcagamarracf.github.io](https://vilcagamarracf.github.io/) &nbsp;&middot;&nbsp;
+> GitHub [@vilcagamarracf](https://github.com/vilcagamarracf) &nbsp;&middot;&nbsp;
+> Twitter [@CesarVilca19](https://twitter.com/CesarVilca19)
