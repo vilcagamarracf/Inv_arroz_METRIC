@@ -15,7 +15,7 @@ Aplicacion con imágenes satelitales Landsat 8.
 
 ## Visualización 📓
 Dos opciones:
-- Visor de libretas Jupyter `nbviewer`, usando el siguiente [link](https://nbviewer.jupyter.org/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/jupyter_notebook/Inv_Arroz_METRIC.ipynb).
+- Visor de libretas Jupyter `nbviewer`, usando el siguiente [link](https://nbviewer.jupyter.org/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/Inv_Arroz_METRIC.ipynb).
 - Google Colab - <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/Inv_Arroz_METRIC.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> (recomendable).
 
 ## Licencia/License ⚖️
