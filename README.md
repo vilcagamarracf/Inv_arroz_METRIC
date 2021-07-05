@@ -1,4 +1,7 @@
-<h1 align="center"> ESTIMACIÓN DE EVAPOTRANSPIRACIÓN DE CULTIVOS DE ARROZ USANDO EL MODELO METRIC ☀️</h1>
+<p align='center'>
+   <img src="Github Cover - METRIC.png" alt="Github Cover - METRIC"/>
+</p>
+
 <h4 align="center"> Aplicación de Hidrología usando Python</h4>
 
 <p align='center'>
