@@ -18,8 +18,8 @@ Aplicacion con imágenes satelitales Landsat 8.
 
 ## Visualización 📓
 Dos opciones:
-- Visor de libretas Jupyter `nbviewer`, usando el siguiente [link](https://nbviewer.jupyter.org/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/Inv_Arroz_METRIC.ipynb).
-- Google Colab - <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/Inv_Arroz_METRIC.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> (recomendable).
+- Ver libreta online: [![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.jupyter.org/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/Inv_Arroz_METRIC.ipynb)
+- Ejecutar la libreta en Google Colab: <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/Inv_Arroz_METRIC.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 ## Licencia/License ⚖️
 MIT License - Copyright (c) 2021 Cesar Francisco Vilca Gamarra \
