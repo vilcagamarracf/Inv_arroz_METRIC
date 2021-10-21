@@ -27,4 +27,4 @@ Mayor información [aquí](https://github.com/vilcagamarracf/Inv_arroz_METRIC/bl
 
 > &nbsp;&middot;&nbsp; Website [vilcagamarracf.github.io](https://vilcagamarracf.github.io/) &nbsp;&middot;&nbsp;
 > GitHub [@vilcagamarracf](https://github.com/vilcagamarracf) &nbsp;&middot;&nbsp;
-> Twitter [@CesarVilca19](https://twitter.com/CesarVilca19)
+> Twitter [@vilcagamarracf](https://twitter.com/vilcagamarracf)
