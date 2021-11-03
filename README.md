@@ -15,6 +15,8 @@
 Desarrollo de un trabajo de investigación sobre estimaciones de evapotranspiración en cultivos de arroz usando el modelo METRIC basado la ecuación de balance de energia. 
 Aplicacion con imágenes satelitales Landsat 8.
 
+Curso gratis sobre evapotranspiración en: [HydroLearn - Evapotrasnpiration](https://edx.hydrolearn.org/courses/course-v1:HumboldtState+ENGR440+2020_Fall/about)
+
 
 ## Visualización
 Dos opciones:
