@@ -1,3 +1,5 @@
+Al parecer los archivos .md en github no renderiza codigo latex.
+
 **Problemática**
 
 - Estimación de ET común:
