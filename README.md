@@ -15,8 +15,9 @@
 Replicación del modelo de estimación de evapotranspiración METRIC en cultivos de arroz basado en la ecuación de balance de energia.
 Aplicacion con imágenes satelitales Landsat8.
 
-Curso gratis sobre evapotranspiración en: [HydroLearn - Evapotranspiration](https://edx.hydrolearn.org/courses/course-v1:HumboldtState+ENGR440+2020_Fall/about)
-
+Más información sobre evapotranspiración:
+- Curso de la Universidad de Humboldt: [HydroLearn - Evapotranspiration](https://edx.hydrolearn.org/courses/course-v1:HumboldtState+ENGR440+2020_Fall/about)
+- Libro: [Crop evapotranspiration - Guidelines for computing crop water requirements - FAO Irrigation and drainage paper 56](https://www.fao.org/3/X0490E/x0490e00.htm)
 
 ## Visualización
 Dos opciones:
