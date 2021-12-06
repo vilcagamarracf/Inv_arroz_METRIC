@@ -39,13 +39,15 @@ En la presente investigación, profundizaremos el método de Balance Energético
 **Métodos: Balance Energético de la Superficie**
 
 Se subdivide en:
--  Balance energético completo para la imagen satelital: 
-    \begin{equation}\lambda{E}=R_n - G -H \end{equation}
-     dónde:
-     - $\lambda{E}$ es la densidad latente del flujo térmico, representando la energía "consumida" por la evaporación del agua, 
-     - $R_n$ es la densidad neta del flujo de radiación, 
-     - $G$ es la densidad del flujo de calor del suelo, y 
-     - $H$ es la densidad sensible del flujo de calor al aire.
+- Balance energético completo para la imagen satelital: 
+
+  $$ \lambda{E}=R_n - G -H $$
+
+  dónde:
+  - $\lambda{E}$ es la densidad latente del flujo térmico, representando la energía "consumida" por la evaporación del agua, 
+  - $R_n$ es la densidad neta del flujo de radiación, 
+  - $G$ es la densidad del flujo de calor del suelo, y 
+  - $H$ es la densidad sensible del flujo de calor al aire.
 - Índice de estrés hídrico basado en la temperatura superficial y las cantidades de vegetación. 
 - Aplicación de un Modelo Continuo de Superficie Terrestre (MSL) que se inicializa parcialmente y avanzado, en el tiempo, utilizando imágenes satelitales
 

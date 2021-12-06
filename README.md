@@ -1,5 +1,5 @@
 <p align='center'>
-   <img src="Github Cover - METRIC.png" alt="Github Cover - METRIC"/>
+   <img src="figures/Github Cover - METRIC.png" alt="Github Cover - METRIC"/>
 </p>
 
 <h4 align="center"> Aplicación de Hidrología usando Python :ear_of_rice: </h4>
