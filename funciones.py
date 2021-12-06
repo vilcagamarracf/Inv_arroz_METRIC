@@ -97,17 +97,18 @@ def ver_imgs_mensual(mes, df, roi, mask=None):
   if lista_imagenes[0][:4] == 'COPE':
     if mask != True:
       for i in lista_imagenes:                   
-        Map.addLayer(ee.Image(i).multiply(0.0001), vis_rgb, f'Imagen {i[21:23]}/{i[23:25]}') # .clip(roiDep)
+        Map.addLayer(ee.Image(i).multiply(0.0001), vis_rgb, f'Imagen {i[21:23]}/{i[23:25]}')
+      # Visualizar al último el ROI
+      Map.addLayer(roi, {'color':'00FF00'}, 'ROI')
     else:
+      # Visualizar primero el ROI
+      Map.addLayer(roi, {'color':'00FF00'}, 'ROI')
       for i in lista_imagenes:                   
-        Map.addLayer(maskS2clouds(ee.Image(i)).multiply(0.0001), vis_rgb, f'Imagen {i[21:23]}/{i[23:25]}') # .clip(roiDep)
+        Map.addLayer(maskS2clouds(ee.Image(i)).multiply(0.0001), vis_rgb, f'Imagen {i[21:23]}/{i[23:25]}') 
   else:
     for i in lista_imagenes:
-      Map.addLayer(ee.Image(i).multiply(0.0001), vis_rgb, f'Imagen {i[-4:-2]}/{i[-2:]}') # .clip(roiDep)
-    
-  # Visualizar al último el distrito de Chongoyape
-  Map.addLayer(roi, {'color':'00FF00'}, 'Chongoyape') # roiChongoyapeDraw
-  
+      Map.addLayer(ee.Image(i).multiply(0.0001), vis_rgb, f'Imagen {i[-4:-2]}/{i[-2:]}')
+      
   return Map
 
 
