@@ -55,9 +55,24 @@ def generar_reporte(icol):
   return df
 
 
+# Función `maskS2clouds(image)` para enmascarar nubes en imágenes Sentinel-2
+
+## Operadores de bit a bit
+# Operador bit a bit desplazamiento a la izquierda <<
+# Little indian (los bits se cuentan de izq a derecha) y Big indian (los bits se cuentan de derecha a izq)
+def maskS2clouds(image):
+  qa = image.select('QA60')
+  opaque_cloud = 1 << 10
+  cirrus_cloud = 1 << 11
+  mask = qa.bitwiseAnd(opaque_cloud).eq(0)\
+           .And(qa.bitwiseAnd(cirrus_cloud).eq(0))
+  clean_image = image.updateMask(mask)
+  return clean_image
+
+
 # Función ver_imgs_mensual(mes, df, roi)
 
-def ver_imgs_mensual(mes, df, roi):
+def ver_imgs_mensual(mes, df, roi, mask=None):
   """Visualizar imágenes a partir del reporte generado con la función generar_reporte
   
   Argumentos:
@@ -80,8 +95,12 @@ def ver_imgs_mensual(mes, df, roi):
   Map = geemap.Map(basemap='OpenStreetMap.Mapnik', layer_ctrl=True)
   Map.centerObject(roi, 12)  # Map.setCenter(-79.809, -6.746, 9)
   if lista_imagenes[0][:4] == 'COPE':
-    for i in lista_imagenes:                   
-      Map.addLayer(ee.Image(i).multiply(0.0001), vis_rgb, f'Imagen {i[21:23]}/{i[23:25]}') # .clip(roiDep)
+    if mask != True:
+      for i in lista_imagenes:                   
+        Map.addLayer(ee.Image(i).multiply(0.0001), vis_rgb, f'Imagen {i[21:23]}/{i[23:25]}') # .clip(roiDep)
+    else:
+      for i in lista_imagenes:                   
+        Map.addLayer(maskS2clouds(ee.Image(i)).multiply(0.0001), vis_rgb, f'Imagen {i[21:23]}/{i[23:25]}') # .clip(roiDep)
   else:
     for i in lista_imagenes:
       Map.addLayer(ee.Image(i).multiply(0.0001), vis_rgb, f'Imagen {i[-4:-2]}/{i[-2:]}') # .clip(roiDep)
@@ -92,16 +111,3 @@ def ver_imgs_mensual(mes, df, roi):
   return Map
 
 
-# Función `maskS2clouds(image)` para enmascarar nubes en imágenes Sentinel-2
-
-## Operadores de bit a bit
-# Operador bit a bit desplazamiento a la izquierda <<
-# Little indian (los bits se cuentan de izq a derecha) y Big indian (los bits se cuentan de derecha a izq)
-def maskS2clouds(image):
-  qa = image.select('QA60')
-  opaque_cloud = 1 << 10
-  cirrus_cloud = 1 << 11
-  mask = qa.bitwiseAnd(opaque_cloud).eq(0)\
-           .And(qa.bitwiseAnd(cirrus_cloud).eq(0))
-  clean_image = image.updateMask(mask)
-  return clean_image
