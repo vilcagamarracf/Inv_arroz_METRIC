@@ -13,16 +13,22 @@
 
 ## Descripción 
 Replicación del modelo de estimación de evapotranspiración METRIC en cultivos de arroz basado en la ecuación de balance de energia.
-Aplicacion con imágenes satelitales Landsat8.
-
-Más información sobre evapotranspiración:
-- Curso de la Universidad de Humboldt: [HydroLearn - Evapotranspiration](https://edx.hydrolearn.org/courses/course-v1:HumboldtState+ENGR440+2020_Fall/about)
-- Libro: [Crop evapotranspiration - Guidelines for computing crop water requirements - FAO Irrigation and drainage paper 56](https://www.fao.org/3/X0490E/x0490e00.htm)
+Aplicacion con imágenes satelitales Landsat 8.
 
 ## Visualización
 Dos opciones:
 - Ver libreta online (sin opción de replicar): [![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.jupyter.org/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/Inv_Arroz_METRIC.ipynb)
 - Ejecutar la libreta en Google Colab (para replicación): <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/Inv_Arroz_METRIC.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+
+## Recursos sobre Evapotranspiración
+
+Curso
+- Curso de la Universidad de Humboldt: [HydroLearn - Evapotranspiration](https://edx.hydrolearn.org/courses/course-v1:HumboldtState+ENGR440+2020_Fall/about)
+
+Libros
+- [Crop evapotranspiration - Guidelines for computing crop water requirements - FAO Irrigation and drainage paper 56](https://www.fao.org/3/X0490E/x0490e00.htm): Bases teóricas sobre estimación de evapotranspiración.
+- [Guidelines for Remote Sensing of Evapotranspiration](https://www.intechopen.com/chapters/26107): Presenta las posibilidades y limitaciones de usar Sensoramiento Remoto para estimar evapotranspiración. 
+- [Thyago Anthony Soares Lima en ResearchGate](https://www.researchgate.net/publication/348906683_SEBAL_for_LANDSAT_8_Python) : Procesamiento de imágenes Landsat 8 en Python usando la metodología SEBAL para estimar evapotranspiración.
 
 ## Licencia/License
 MIT License - Copyright (c) 2021 Cesar Francisco Vilca Gamarra \
