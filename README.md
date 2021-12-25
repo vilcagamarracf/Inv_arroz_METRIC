@@ -12,7 +12,7 @@
 <img src="figures/Region_of_Interest.PNG" alt="Zona de trabajo" align='right' width=300/>
 
 ## Descripción 
-Replicación del modelo de estimación de evapotranspiración METRIC en cultivos de arroz basado en la ecuación de balance de energia.
+Replicación del modelo de estimación de evapotranspiración METRIC ([Allen et. al 2007](https://www.researchgate.net/publication/228615269_Satellite-Based_Energy_Balance_for_Mapping_Evapotranspiration_With_Internalized_Calibration_METRIC_-_Model)) en cultivos de arroz basado en la ecuación de balance de energia.
 Aplicacion con imágenes satelitales Landsat 8.
 
 ## Visualización
