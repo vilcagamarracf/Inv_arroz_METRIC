@@ -29,7 +29,8 @@ Libros
 - Bases teóricas sobre estimación de evapotranspiración
    - [FAO 56 - Evapotranspiración del cultivo - Guías para la determinación de los requerimientos de agua de los cultivos](https://www.fao.org/3/x0490s/x0490s00.htm)
    - [FAO 56 - Crop evapotranspiration - Guidelines for computing crop water requirements](https://www.fao.org/3/X0490E/x0490e00.htm)
-- [Guidelines for Remote Sensing of Evapotranspiration](https://www.intechopen.com/chapters/26107): Presenta las posibilidades y limitaciones de usar Sensoramiento Remoto para estimar evapotranspiración. 
+- van der Tol, C., & Parodi, G. N. (2012). Guidelines for remote sensing of evapotranspiration. Evapotranspiration — Remote sensing and modeling, 227, 250. doi:[10.5772/18582](https://www.intechopen.com/chapters/26107)
+   - Presenta las posibilidades y limitaciones de usar Sensoramiento Remoto para estimar evapotranspiración. 
 - [Thyago Anthony Soares Lima en ResearchGate](https://www.researchgate.net/publication/348906683_SEBAL_for_LANDSAT_8_Python) : Procesamiento de imágenes Landsat 8 en Python usando la metodología SEBAL para estimar evapotranspiración.
 
 ## Licencia/License
