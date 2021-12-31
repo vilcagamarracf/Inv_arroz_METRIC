@@ -23,7 +23,7 @@ Libretas
 ## Recursos sobre Evapotranspiración
 
 Curso
-- Curso de la Universidad de Humboldt: [HydroLearn - Evapotranspiration](https://edx.hydrolearn.org/courses/course-v1:HumboldtState+ENGR440+2020_Fall/about)
+- [HydroLearn - Evapotranspiration](https://edx.hydrolearn.org/courses/course-v1:HumboldtState+ENGR440+2020_Fall/about) - Universidad de Humboldt
 
 Libros
 - Bases teóricas sobre estimación de evapotranspiración
