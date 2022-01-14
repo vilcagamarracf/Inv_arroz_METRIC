@@ -8,7 +8,6 @@
    <img src="https://img.shields.io/github/last-commit/vilcagamarracf/Inv_arroz_METRIC?style=flat-square" alt="GitHub last commit"/>
 </p>
 
-
 <img src="figures/Region_of_Interest.PNG" alt="Zona de trabajo" align='right' width=300/>
 
 ## Descripción 
