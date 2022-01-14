@@ -52,3 +52,10 @@ Se subdivide en:
 - Aplicación de un Modelo Continuo de Superficie Terrestre (MSL) que se inicializa parcialmente y avanzado, en el tiempo, utilizando imágenes satelitales
 
 Todas las metodologías anteriormente mencionadas solamente trabajan sobre imágenes disponibles y dependiendo de la revisita del mismo, quedan vacíos de información entre imágenes.
+
+> Diagrama de Flujo: Radiación de onda corta entrante
+![](figures/R_s_down.svg)
+
+> Diagrama de Flujo: Radiación de onda larga saliente
+![](figures/R_l_up.svg)
+
