@@ -25,10 +25,11 @@ Curso
 - [HydroLearn - Evapotranspiration](https://edx.hydrolearn.org/courses/course-v1:HumboldtState+ENGR440+2020_Fall/about) - Universidad de Humboldt
 
 Libros
-- Bases teóricas sobre estimación de evapotranspiración
-   - [FAO 56 - Evapotranspiración del cultivo - Guías para la determinación de los requerimientos de agua de los cultivos](https://www.fao.org/3/x0490s/x0490s00.htm)
-   - [FAO 56 - Crop evapotranspiration - Guidelines for computing crop water requirements](https://www.fao.org/3/X0490E/x0490e00.htm)
-- van der Tol, C., & Parodi, G. N. (2012). Guidelines for remote sensing of evapotranspiration. Evapotranspiration — Remote sensing and modeling, 227, 250. doi:[10.5772/18582](https://www.intechopen.com/chapters/26107)
+- Allen, R. G., Pereira, L. S., Raes, D., & Smith, M. (1998). Crop evapotranspiration-Guidelines for computing crop water requirements-FAO Irrigation and drainage paper 56. Fao, Rome, 300(9), D05109.
+   - Bases teóricas sobre estimación de evapotranspiración
+   - [Español - FAO 56 - Evapotranspiración del cultivo - Guías para la determinación de los requerimientos de agua de los cultivos](https://www.fao.org/3/x0490s/x0490s00.htm)
+   - [English - FAO 56 - Crop evapotranspiration - Guidelines for computing crop water requirements](https://www.fao.org/3/X0490E/x0490e00.htm)
+- Van der Tol, C., & Parodi, G. N. (2012). Guidelines for remote sensing of evapotranspiration. Evapotranspiration — Remote sensing and modeling, 227, 250. doi:[10.5772/18582](https://www.intechopen.com/chapters/26107)
    - Presenta las posibilidades y limitaciones de usar Sensoramiento Remoto para estimar evapotranspiración. 
 - Dingman, S. L. (2015). Physical hydrology. Waveland press. 
    - Información sobre el intercambio de agua y energía en superficie-atmósfera
