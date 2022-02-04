@@ -30,6 +30,10 @@ Libros
    - [FAO 56 - Crop evapotranspiration - Guidelines for computing crop water requirements](https://www.fao.org/3/X0490E/x0490e00.htm)
 - van der Tol, C., & Parodi, G. N. (2012). Guidelines for remote sensing of evapotranspiration. Evapotranspiration — Remote sensing and modeling, 227, 250. doi:[10.5772/18582](https://www.intechopen.com/chapters/26107)
    - Presenta las posibilidades y limitaciones de usar Sensoramiento Remoto para estimar evapotranspiración. 
+- Dingman, S. L. (2015). Physical hydrology. Waveland press. 
+   - Información sobre el intercambio de agua y energía en superficie-atmósfera
+
+Código de terceros
 - [Thyago Anthony Soares Lima en ResearchGate](https://www.researchgate.net/publication/348906683_SEBAL_for_LANDSAT_8_Python) : Procesamiento de imágenes Landsat 8 en Python usando la metodología SEBAL para estimar evapotranspiración.
 
 ## Licencia/License
