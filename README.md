@@ -27,14 +27,13 @@ Curso
 Libros
 - Allen, R. G., Pereira, L. S., Raes, D., & Smith, M. (1998). Crop evapotranspiration-Guidelines for computing crop water requirements-FAO Irrigation and drainage paper 56. Fao, Rome, 300(9), D05109.
    - [Español](https://www.fao.org/3/x0490s/x0490s00.htm) - Guías para la determinación de los requerimientos de agua de los cultivos
-   - [English](https://www.fao.org/3/X0490E/x0490e00.htm) - Guidelines for computing crop water requirements
-- Van der Tol, C., & Parodi, G. N. (2012). Guidelines for remote sensing of evapotranspiration. *Evapotranspiration — Remote sensing and modeling*, 227, 250. doi:[10.5772/18582](https://www.intechopen.com/chapters/26107)
-   - Presenta las posibilidades y limitaciones de usar Sensoramiento Remoto para estimar evapotranspiración. 
+   - [English](https://www.fao.org/3/X0490E/x0490e00.htm) - Guidelines for computing crop water requirements 
 - Dingman, S. L. (2015). Physical hydrology. Waveland press. 
    - Información sobre el intercambio de agua y energía en superficie-atmósfera
  
 Artículos
 - Bhattarai, N., Quackenbush, L. J., Im, J., & Shaw, S. B. (2017). A new optimized algorithm for automating endmember pixel selection in the SEBAL and METRIC models. *Remote Sensing of Environment*, 196, 178-192. [https://doi.org/10.1016/j.rse.2017.05.009](https://doi.org/10.1016/j.rse.2017.05.009)
+- Van der Tol, C., & Parodi, G. N. (2012). Guidelines for remote sensing of evapotranspiration. *Evapotranspiration — Remote sensing and modeling*, 227, 250. [https://doi.org/10.5772/18582](https://doi.org/10.5772/18582)
 
 Código de terceros
 - [Thyago Anthony Soares Lima en ResearchGate](https://www.researchgate.net/publication/348906683_SEBAL_for_LANDSAT_8_Python) : Procesamiento de imágenes Landsat 8 en Python usando la metodología SEBAL para estimar evapotranspiración.
