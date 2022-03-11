@@ -21,6 +21,11 @@ Libretas
 
 ## Recursos sobre Evapotranspiración
 
+Artículos
+- Allen, R. G., Tasumi, M., & Trezza, R. (2007). Satellite-based energy balance for mapping evapotranspiration with internalized calibration (METRIC)—Model. *Journal of irrigation and drainage engineering*, 133(4), 380-394. [http://dx.doi.org/10.1061/(ASCE)0733-9437(2007)133:4(380)](https://www.researchgate.net/publication/228615269_Satellite-Based_Energy_Balance_for_Mapping_Evapotranspiration_With_Internalized_Calibration_METRIC_-_Model)
+- Bhattarai, N., Quackenbush, L. J., Im, J., & Shaw, S. B. (2017). A new optimized algorithm for automating endmember pixel selection in the SEBAL and METRIC models. *Remote Sensing of Environment*, 196, 178-192. [https://doi.org/10.1016/j.rse.2017.05.009](https://doi.org/10.1016/j.rse.2017.05.009)
+- Van der Tol, C., & Parodi, G. N. (2012). Guidelines for remote sensing of evapotranspiration. *Evapotranspiration — Remote sensing and modeling*, 227, 250. [https://doi.org/10.5772/18582](https://doi.org/10.5772/18582)
+
 Curso
 - [HydroLearn - Evapotranspiration](https://edx.hydrolearn.org/courses/course-v1:HumboldtState+ENGR440+2020_Fall/about) - Universidad de Humboldt
 
@@ -30,13 +35,10 @@ Libros
    - [English](https://www.fao.org/3/X0490E/x0490e00.htm) - Guidelines for computing crop water requirements 
 - Dingman, S. L. (2015). Physical hydrology. Waveland press. 
    - Información sobre el intercambio de agua y energía en superficie-atmósfera
- 
-Artículos
-- Bhattarai, N., Quackenbush, L. J., Im, J., & Shaw, S. B. (2017). A new optimized algorithm for automating endmember pixel selection in the SEBAL and METRIC models. *Remote Sensing of Environment*, 196, 178-192. [https://doi.org/10.1016/j.rse.2017.05.009](https://doi.org/10.1016/j.rse.2017.05.009)
-- Van der Tol, C., & Parodi, G. N. (2012). Guidelines for remote sensing of evapotranspiration. *Evapotranspiration — Remote sensing and modeling*, 227, 250. [https://doi.org/10.5772/18582](https://doi.org/10.5772/18582)
 
-Código de terceros
-- [Thyago Anthony Soares Lima en ResearchGate](https://www.researchgate.net/publication/348906683_SEBAL_for_LANDSAT_8_Python) : Procesamiento de imágenes Landsat 8 en Python usando la metodología SEBAL para estimar evapotranspiración.
+
+<!-- Código de terceros
+- [Thyago Anthony Soares Lima en ResearchGate](https://www.researchgate.net/publication/348906683_SEBAL_for_LANDSAT_8_Python) : Procesamiento de imágenes Landsat 8 en Python usando la metodología SEBAL para estimar evapotranspiración. -->
 
 ## Licencia/License
 MIT License - Copyright (c) 2021 Cesar Francisco Vilca Gamarra \
