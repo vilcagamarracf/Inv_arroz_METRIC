@@ -16,10 +16,11 @@ Aplicacion con imágenes satelitales Landsat 8.
 
 ## Visualización
 Libretas 
-- Archivo completo <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/files/Inv_Arroz_METRIC.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
-- Pruebas <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/files/Inv_Arroz_METRIC_Pruebas.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+<!-- - Archivo completo <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/files/Inv_Arroz_METRIC.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> -->
+- <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/notebooks/1_Visualizaci%C3%B3n_de_Im%C3%A1genes_en_Earth_Engine.ipynb" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> Visualización de imágenes con Earth Engine
+- <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/notebooks/2_Balance_de_Energ%C3%ADa_Superficial_Modelo_METRIC.ipynb" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> Modelo METRIC
 
-## Recursos sobre Evapotranspiración
+## Referencias
 
 Artículos
 - Allen, R. G., Tasumi, M., & Trezza, R. (2007). Satellite-based energy balance for mapping evapotranspiration with internalized calibration (METRIC)—Model. *Journal of irrigation and drainage engineering*, 133(4), 380-394. [http://dx.doi.org/10.1061/(ASCE)0733-9437(2007)133:4(380)](https://www.researchgate.net/publication/228615269_Satellite-Based_Energy_Balance_for_Mapping_Evapotranspiration_With_Internalized_Calibration_METRIC_-_Model)
