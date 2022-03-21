@@ -28,7 +28,7 @@ Artículos
 - Van der Tol, C., & Parodi, G. N. (2012). Guidelines for remote sensing of evapotranspiration. *Evapotranspiration — Remote sensing and modeling*, 227, 250. [https://doi.org/10.5772/18582](https://doi.org/10.5772/18582)
 
 Curso
-- [HydroLearn - Evapotranspiration](https://edx.hydrolearn.org/courses/course-v1:HumboldtState+ENGR440+2020_Fall/about) - Humboldt State University, California
+- Archibald, J., Gutierrez, H., Xu, S. (2020) Evapotranspiration. HydroLearn. [https://edx.hydrolearn.org/courses/course-v1:HumboldtState+ENGR440+2020_Fall/about](https://edx.hydrolearn.org/courses/course-v1:HumboldtState+ENGR440+2020_Fall/about)
 
 Libros
 - Allen, R. G., Pereira, L. S., Raes, D., & Smith, M. (1998). Crop evapotranspiration-Guidelines for computing crop water requirements-FAO Irrigation and drainage paper 56. Fao, Rome, 300(9), D05109.
