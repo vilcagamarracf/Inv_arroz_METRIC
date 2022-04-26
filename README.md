@@ -8,11 +8,12 @@
    <img src="https://img.shields.io/github/last-commit/vilcagamarracf/Inv_arroz_METRIC?style=flat-square" alt="GitHub last commit"/>
 </p>
 
-<img src="figures/Region_of_Interest.PNG" alt="Zona de trabajo" align='right' width=300/>
-
 ## Descripción 
-Replicación del modelo de estimación de evapotranspiración METRIC ([Allen et. al 2007](https://www.researchgate.net/publication/228615269_Satellite-Based_Energy_Balance_for_Mapping_Evapotranspiration_With_Internalized_Calibration_METRIC_-_Model)) en cultivos de arroz basado en la ecuación de balance de energia.
-Aplicacion con imágenes satelitales Landsat 8.
+Aplicación de Teledetección para estimar evapotranspiración en cultivos de arroz en el distrito de Ferreñafe, usando el modelo METRIC ([Allen et. al 2007](https://www.researchgate.net/publication/228615269_Satellite-Based_Energy_Balance_for_Mapping_Evapotranspiration_With_Internalized_Calibration_METRIC_-_Model)) 
+, modelo basado en la ecuación de balance energía superficial. 
+
+<img src="figures/mapa_zona-de-estudio.png" alt="Zona de trabajo" width='100%'/>
+
 
 ## Visualización
 Libretas 
