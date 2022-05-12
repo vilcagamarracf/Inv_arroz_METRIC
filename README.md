@@ -12,7 +12,7 @@
 Aplicación de Teledetección para estimar evapotranspiración en cultivos de arroz en el distrito de Ferreñafe, usando el modelo METRIC ([Allen et. al 2007](https://www.researchgate.net/publication/228615269_Satellite-Based_Energy_Balance_for_Mapping_Evapotranspiration_With_Internalized_Calibration_METRIC_-_Model)) 
 , modelo basado en la ecuación de balance energía superficial. 
 
-<img src="figures/mapa_zona-de-estudio.png" alt="Zona de trabajo" width='100%'/>
+<img src="figures/mapa_zona-de-estudio.jpg" alt="Zona de trabajo" width='100%'/>
 
 
 ## Visualización
