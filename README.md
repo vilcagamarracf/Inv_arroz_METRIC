@@ -16,10 +16,12 @@ Aplicación de Teledetección para estimar evapotranspiración en cultivos de ar
 
 
 ## Visualización
-Libretas 
-<!-- - Archivo completo <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/files/Inv_Arroz_METRIC.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> -->
-- <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/notebooks/1_Visualizaci%C3%B3n_de_Im%C3%A1genes_en_Earth_Engine.ipynb" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> Visualización de imágenes con Earth Engine
-- <a href="https://colab.research.google.com/github/vilcagamarracf/Inv_arroz_METRIC/blob/main/notebooks/2_Balance_de_Energ%C3%ADa_Superficial_Modelo_METRIC.ipynb" target="_blank"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> Modelo METRIC
+
+En GitHub:
+- Carpeta [`notebooks`](https://github.com/vilcagamarracf/Inv_arroz_METRIC/tree/main/notebooks)
+
+Jupyter Notebook Viewer:
+- [![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.org/github/vilcagamarracf/Inv_arroz_METRIC/tree/main/notebooks/)
 
 ## Referencias
 
