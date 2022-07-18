@@ -3,9 +3,11 @@ Al parecer los archivos .md en github no renderiza codigo latex.
 **Problemática**
 
 - Estimación de ET común:
+  
   $$
   \text{ET} = \text{ET}_{ref} * K_c
   $$
+
   Dónde:
   - $\text{ET}$ : Evapotranspiración
   - $\text{ET}_{ref}$ : Evapotranspiración de referencia basada en el clima
