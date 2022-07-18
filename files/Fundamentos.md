@@ -1,4 +1,4 @@
-Al parecer los archivos .md en github no renderiza codigo latex.
+- ~~Al parecer los archivos .md en github no renderiza codigo latex.~~ Ahora ya acepta el renderizado en latex.
 
 **Problemática**
 
