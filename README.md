@@ -15,7 +15,7 @@ El presente repositorio alberga el código usado para estimar evapotranspiració
 <img src="figures/mapa_zona-de-estudio.jpg" alt="Zona de trabajo" width='100%'/>
 
 
-## Visualización
+## Código de Python
 
 En GitHub:
 - Carpeta [`notebooks`](https://github.com/vilcagamarracf/Inv_arroz_METRIC/tree/main/notebooks)
