@@ -12,8 +12,9 @@
 El presente repositorio alberga el código usado para estimar evapotranspiración en cultivos de arroz en el distrito de Ferreñafe, usando el modelo METRIC ([Allen et al., 2007](https://www.researchgate.net/publication/228615269_Satellite-Based_Energy_Balance_for_Mapping_Evapotranspiration_With_Internalized_Calibration_METRIC_-_Model)), el cual se basa en el modelo SEBAL ([Bastiaanssen et al., 1998](https://www.sciencedirect.com/science/article/abs/pii/S0022169498002534)), cuya formulación posee como fundamento la ecuación de balance energía superficial. 
 
 
-<img src="figures/mapa_zona-de-estudio.jpg" alt="Zona de trabajo" width='100%'/>
+<img src="figures/mapa-articulo.jpg" alt="Zona de trabajo" width='100%'/>
 
+Ubicación de la región Lambayeque en la costa norte del Perú (a), ubicación de la zona de estudio en la provincia y distrito Ferreñafe, región Lambayeque (b), y su delimitación en el Fundo Zapote Figueroa (c). Ciclo de cultivo enero-junio 2022. 
 
 ## Código de Python
 
