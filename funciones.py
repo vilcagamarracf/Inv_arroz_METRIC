@@ -6,8 +6,12 @@ import math
 import os
 
 import ee
+
+import pandas as pd
 import matplotlib.pyplot as plt
+
 import numpy as np
+
 from geemap import cartoee
 
 # Inicio de Earth Engine
@@ -149,7 +153,7 @@ def get_emisividades(img_ndvi, img_lai):
 
     # e_NB
     e_NB = img_lai.expression('0.97 + 0.0033*LAI',
-                                {'LAI':img_lai}).rename('e_NB') # LAI <= 3 y NDVI > 0
+                              {'LAI':img_lai}).rename('e_NB') # LAI <= 3 y NDVI > 0
 
     e_NB = e_NB.where(img_ndvi.lt(0), 0.985) # NDVI < 0
     e_NB = e_NB.where(img_lai.gt(3).And(img_ndvi.gt(0)), 0.98) # LAI > 3; NDVI > 0
@@ -183,18 +187,14 @@ def get_decl_lat_hra(img, roi, doy):
 
 
     # Declinacion solar δ [rad] : ee.Number 
-    angl_decl = ee.Number.expression(
-        '-23.45*cos( 360*(d+10)/365 * factor )', 
-        {'d':doy, 'factor':factor_rad}).multiply(factor_rad) 
-
+    angl_decl = ee.Number.expression('-23.45*cos( 360*(d+10)/365 * factor )', 
+                                     {'d':doy, 'factor':factor_rad}).multiply(factor_rad) 
 
     # Latitud ϕ [rad] : ee.Image
     latitud = img_lonlat.select('latitude').multiply(factor_rad)
 
 
-
     # Angulo horario [rad] : ee.Image
-
     B   = ee.Number.expression('360/365*(doy-81)', 
                                 {'doy': doy}).multiply(factor_rad) # radianes
 
@@ -205,7 +205,7 @@ def get_decl_lat_hra(img, roi, doy):
 
     # LSTM = -75 = 15° * (Diferencia entre hora local y GMT = -5) 
     tc  = longitud.expression('4*(long-(-75)) + EoT',
-                                {'EoT': EoT, 'long':longitud}) # radianes 
+                              {'EoT': EoT, 'long':longitud}) # radianes 
 
     lt  = img.date().getFraction('day', 'America/Lima').multiply(24)#.getInfo() # 10.4712 aprox
 
@@ -236,7 +236,8 @@ def get_cos_theta(angl_decl, latitud, angle_hra, slope_rad, aspect_rad):
     - cos_theta (ee.Image) : Mapa de Cosenos del ángulo incidencia solar 
     
     """
-
+    # 1. Mountain Model
+    # Duffie and Beckman (1991)
     cos_theta = latitud.expression(
         """
         sin(delta)*sin(phi)*cos(s) 
@@ -264,22 +265,22 @@ def get_surface_temp(img_toa, e_nb):
     Inputs:
     - img_toa (ee.Image): Imagen calibrada al tope de la atmósfera TOA
     - e_nb    (ee.Image): Mapa de emisividades de banda estrecha 
+
+    Retorna: 
+    - ee.Image con banda 'Ts_k'
     
     """
 
     # Factor de correción Rc dónde: Rp = 0.91, Tnb = 0.866, Rsky = 1.32
-    rc = img_toa.expression(
-        '(Lt10 - 0.91)/0.866 - (1-e_nb)*1.32',
-        {'Lt10':img_toa.select('B10'), 'e_nb':e_nb}
-        )
+    rc = img_toa.expression('(Lt10 - 0.91)/0.866 - (1-e_nb)*1.32',
+                            {'Lt10':img_toa.select('B10'), 'e_nb':e_nb})
     
     # Termperatura de superficie: b10_k1 = 774.89, b10_k2 = 1321.08
-    ts_k = rc.expression(
-        '1321.08/( log( (e_nb*774.89/rc) + 1 ) )',
-        {'e_nb':e_nb, 'rc':rc}
-        ).rename('Ts_k')
+    ts_k = rc.expression('1321.08/( log( (e_nb*774.89/rc) + 1 ) )',
+                         {'e_nb':e_nb, 'rc':rc}).rename('Ts_k')
     
     return ts_k
+
 
 
 def convert_TOA_to_SR(img_toa, P_air, w, cos_theta_hor):
@@ -401,38 +402,45 @@ def convert_TOA_to_SR(img_toa, P_air, w, cos_theta_hor):
 
         img_toa = img_toa.addBands(p_s_b, None, True)
     
-    bands_sr = ['B2_SR', 'B3_SR', 'B4_SR', 'B5_SR', 'B6_SR', 'B7_SR']
+    bands_sr = ['SR_B2', 
+                'SR_B3', 
+                'SR_B4', 
+                'SR_B5', 
+                'SR_B6', 
+                'SR_B7']
 
     img_sr = img_toa.select(bands).rename(bands_sr)
 
     return img_sr
 
 
-def get_albedo(img_sr):
+def get_albedo(img_sr, albedo_method):
 
     """Obtener el albedo de una imagen mediante una calibración con coeficientes de 
     ponderación por banda (Tasumi et al., 2008) https://doi.org/10.1061/(ASCE)1084-0699(2008)13:2(51)
 
-    Parametros
-    ----------
-    img_sr : ee.Image
-        Imagen satelital SR.
+    Inputs:
+    - img_sr : ee.Image
+    - albedo_method: str
 
-    Retorna
-    -------
-    albedo : ee.Image
-        Albedo de una imagen satelital. 
+    Retorna:
+    - albedo : ee.Image
     """
 
+    # '0.300*B2 + 0.277*B3 + 0.233*B4 + 0.143*B5 + 0.036*B6 + 0.012*B7',  # Silva et al. (2016)
+    # '0.254*B2 + 0.149*B3 + 0.147*B4 + 0.311*B5 + 0.103*B6 + 0.036*B7',  # Tasumi et al. (2007)
+    # '0.3561*B2 + 0.3972*B3 + 0.3904*B4 + 0.6966*B5 + 0.2286*B6 + 0.1596*B7', # Javier
+    # '(0.356*B2 + 0.130*B4 + 0.373*B5 + 0.085*B6 + 0.072*B7 - 0.018)/1.016',  # Javier 2
+    
     albedo = img_sr.expression(
-        '0.254*B2 + 0.149*B3 + 0.147*B4 + 0.311*B5 + 0.103*B6 + 0.036*B7',
+        albedo_method,
         {
-            'B2' : img_sr.select('B2_SR'),
-            'B3' : img_sr.select('B3_SR'),
-            'B4' : img_sr.select('B4_SR'),
-            'B5' : img_sr.select('B5_SR'),
-            'B6' : img_sr.select('B6_SR'),
-            'B7' : img_sr.select('B7_SR')
+            'B2' : img_sr.select('SR_B2'),
+            'B3' : img_sr.select('SR_B3'),
+            'B4' : img_sr.select('SR_B4'),
+            'B5' : img_sr.select('SR_B5'),
+            'B6' : img_sr.select('SR_B6'),
+            'B7' : img_sr.select('SR_B7')        
         }
     ).rename('albedo')
 
@@ -440,8 +448,7 @@ def get_albedo(img_sr):
 
 
 
-
-def getRadiacionNeta(img_ee, roi, dem, lai_method=0):
+def getRadiacionNeta(img_ee, roi, dem, lai_method, albedo_method, HR):
 
     """Obtener mapa de Radiación Neta
 
@@ -466,34 +473,51 @@ def getRadiacionNeta(img_ee, roi, dem, lai_method=0):
     
     # Factor de conversión de grados a radianes
     factor_rad = ee.Number(math.pi/180)
-    doy = img_ee.date().getRelative('day', 'year') # ee.Number
-    
-    img_toa = convert_RAW_to_TOA(img_ee) # ee.Image
 
+    # Fechas
+    img_date = img_ee.date() # ee.Date
+    doy = img_date.getRelative('day', 'year') # ee.Number
+    fecha = img_date.format('YYYY-MM-dd').getInfo() # string
+
+    # =================================================================
+    # Procesamiento
+    # =================================================================
+
+    # Procesar imagen RAW a TOA
+    img_toa = convert_RAW_to_TOA(img_ee).clip(roi) # ee.Image
     
     # Índices de vegetación (eq. 23, 19 y 18)
     img_ndvi = get_ndvi_L8(img_toa)
     
-    if lai_method is 0:
+    if lai_method == 0:
         img_savi = get_savi_L8(img_toa, L=0.1)
         img_lai  = get_lai_L8(img_savi)
         
-    if lai_method is 1:
+    if lai_method == 1:
         img_savi = get_savi_L8(img_toa, L=0.5)
         img_lai  = get_lai_L8(img_savi)
     
     # Obtener LAI mediante relación NDVI - IAF
-    if lai_method is 2:
+    if lai_method == 2:
         img_savi = get_savi_L8(img_toa) 
-        img_lai = img_ndvi.multiply(2.1362).add(0.0869).rename('LAI')
-    
+        img_lai = img_ndvi.multiply(2.1362).add(0.0869).rename('LAI') # Usando 10 datos (1 fecha - excel de Martin)
+        
+    if lai_method == 3:
+        img_savi = get_savi_L8(img_toa) 
+        img_lai = img_ndvi.expression('(2.3523*img_ndvi)**2 - 1.9013*img_ndvi + 1.7714', 
+                                      {'img_ndvi': img_ndvi.select('NDVI')}
+                                      ).rename('LAI') # Usando 30 datos
+
+
+    img_lai = img_lai.where(img_lai.lte(0), 0)
     
     # A partir del DEM: Pendiente y Aspect [rad]
-    img_slopes = ee.Terrain.slope(dem)
-    img_slopes_rad = img_slopes.multiply(factor_rad)   # ee.Image 
+    img_dem_clippped = dem.clip(roi)
+    img_slopes = ee.Terrain.slope(img_dem_clippped) # grados
+    img_slopes_rad = img_slopes.multiply(factor_rad)  # ee.Image, radianes 
         
-    img_aspect = ee.Terrain.aspect(dem)
-    img_aspect_rad = img_aspect.multiply(factor_rad)  # ee.Image 
+    img_aspect = ee.Terrain.aspect(img_dem_clippped) # grados
+    img_aspect_rad = img_aspect.multiply(factor_rad)  # ee.Image, radianes
 
 
     # Ángulos Declinación, Latitud y Horario [rad]
@@ -503,8 +527,10 @@ def getRadiacionNeta(img_ee, roi, dem, lai_method=0):
     # Parámetro: Emisividad e_0 (eq. 17)
     e_nb, e_0 = get_emisividades(img_ndvi, img_lai)
 
-
+    # =================================================================
     # Parámetro: Radiación de onda corta entrante 
+    # =================================================================
+    
     # Requiere: t_sw, d2, cos_theta_rel 
     # t_sw requiere: P_air, w, cos_theta_hor
     # w requiere: e_s
@@ -522,7 +548,7 @@ def getRadiacionNeta(img_ee, roi, dem, lai_method=0):
 
     # 3. t_sw (eq. 4)
     # 3.1. P_air Atmospheric Pressure [kPa] (eq. 5)
-    P_air = dem.expression('101.3*( (293-0.0065*z)/293 )**(5.26)', 
+    P_air = dem.expression('101.3*( (293-0.0065*z)/293 )**5.26', 
                            {'z': dem.select(0)}) # ee.Image
 
     # 3.2. cos_theta_hor (eq. 8)
@@ -539,19 +565,20 @@ def getRadiacionNeta(img_ee, roi, dem, lai_method=0):
 
     # 3.3.2. Near-surface vapor pressure ea [kPa]
     # Ojo temperatura se requiere en °C
+    # e0_eq = '6.112*exp(17.67*t / (t + 243.5))' # https://www.weather.gov/media/epz/wxcalc/vaporPressure.pdf
+    e0_eq = '0.6108*exp(17.27*t / (t + 237.3))' # FAO 56, Allen (2012) https://www.fao.org/3/x0490s/x0490s01.pdf
+    e0 = ts_c.expression(e0_eq, {'t': ts_c.select('Ts_c')})
+    ea = e0.multiply(HR/100).rename('vapor_pressure')
 
-    ea = ts_c.expression('6.112*exp(17.67 / (t + 243.5))', 
-                         {'t' : ts_c.select('Ts_c')}
-                         ).rename('vapor_pressure')
-
-    # 3.3.3. Agua precipitable en la atmósfera w [mm]
-    w = ea.multiply(P_air).multiply(0.14).add(2.1).rename('w')
-
-    # 3.3.4. t_sw: broad-band atmospheric transmissivity (eq. 4)
+    # 3.3.3. Agua precipitable en la atmósfera w [mm] Garrison & Adler (1990)
+    w = ea.expression('0.14*ea*P + 2.1', {'ea':ea, 'P':P_air}).rename('w')
+    
+    # 3.3.4. t_sw: broad-band atmospheric transmissivity (eq. 4), ASCE-EWRI (2005)
     t_sw = P_air.expression('''
                             0.35 + 0.627*exp(
-                                - 0.00146*P_air/(Kt*cos_theta_hor) 
-                                - 0.075*(W/cos_theta_hor)**0.4)
+                            - 0.00146*P_air/(Kt*cos_theta_hor) 
+                            - 0.075*(W/cos_theta_hor)**0.4
+                            )
                             ''',
                             {'P_air':P_air, 'Kt':1, 'cos_theta_hor':cos_theta_hor, 'W':w}
                             ).rename('t_sw')
@@ -561,7 +588,10 @@ def getRadiacionNeta(img_ee, roi, dem, lai_method=0):
                                       {'cos_theta_rel':cos_theta_rel, 't_sw':t_sw, 'd2':d2}
                                       ).rename('R_s_in')
 
+    # =================================================================
     # Parámetro: Radiación de onda larga entrante
+    # =================================================================
+
     # ea: effective atmospheric emissivity (eq. 25)
     atm_emissivity_ea = t_sw.expression('0.85*(- log(t_sw))**0.09',
                                         {'t_sw': t_sw}
@@ -570,50 +600,59 @@ def getRadiacionNeta(img_ee, roi, dem, lai_method=0):
     # Finalmente: R_l_in (eq. 24)
     R_l_in = atm_emissivity_ea.multiply(5.67E-08).multiply(ts.pow(4)).rename('R_l_in')
 
+    # =================================================================
     # Parámetro: Radiación de onda larga saliente (eq.  16)
+    # =================================================================
+
     R_l_out = e_0.multiply(5.67E-08).multiply(ts.pow(4)).rename('R_l_out')
 
+    # =================================================================
     # Parámetro: Albedo
+    # =================================================================
 
-    # Corrección Tasumi (eqs. 10 - 14)
+    # Corrección atmosférica - Tasumi et al. (2007) (eqs. 10 - 14)
     img_sr_tasumi = convert_TOA_to_SR(img_toa, P_air, w, cos_theta_hor)
-    # Bandas: ['B2_SR', 'B3_SR', 'B4_SR', 'B5_SR', 'B6_SR', 'B7_SR']
 
     # Albedo (eq. 15)
-    img_albedo = get_albedo(img_sr_tasumi)
+    img_albedo = get_albedo(img_sr_tasumi, albedo_method)
 
     # Radiación Neta (eq. 2)
-    Rn = img_albedo.expression('(1-albedo)*R_s_in + (R_l_in - R_l_out) - (1-e_0)*R_l_in',
-                                {'albedo':img_albedo,
-                                'R_s_in':R_s_in,
-                                'R_l_in':R_l_in,
-                                'R_l_out':R_l_out,
-                                'e_0':e_0}
-                                ).rename('R_n')
+    Rn = img_albedo.expression(
+        '(1-albedo)*R_s_in + (R_l_in - R_l_out) - (1-e_0)*R_l_in',
+        {'albedo':img_albedo,
+         'R_s_in':R_s_in,
+         'R_l_in':R_l_in,
+         'R_l_out':R_l_out,
+         'e_0':e_0}
+         ).rename('R_n')
 
     img_Rn = Rn.addBands([R_s_in, R_l_in, R_l_out])
 
     # Juntar los parámetros obtenidos en una sola imagen
-    img_productos = ee.Image([img_ndvi.select('NDVI'),
-                              img_savi.select('SAVI'),
-                              img_lai.select('LAI'),
-                              img_albedo,
-                              ts,
-                              ts_c,
-                              t_sw,
-                              e_0,
-                              e_nb,
-                              cos_theta_rel,
-                              img_slopes,
-                              dem
-                              ])
+    img_productos = ee.Image([
+        img_ndvi.select('NDVI'),
+        img_savi.select('SAVI'),
+        img_lai.select('LAI'),
+        img_albedo,
+        ts,
+        ts_c,
+        t_sw,
+        e_0,
+        e_nb,
+        cos_theta_rel,
+        cos_theta_hor,
+        img_slopes,
+        dem
+        ])
 
     img_productos_dict = {
         'img_Rn': img_Rn,
         'img_SR': img_sr_tasumi,
+        'img_toa': img_toa,
         'img_productos': img_productos,
         'd2': d2,
-        'doy': doy
+        'doy': doy,
+        'fecha': fecha
     }
         
     return img_productos_dict
@@ -664,12 +703,14 @@ def get_stats(img, geometry, scale):
 
 
 def get_grafica_cartoee_color(image, 
-                              vis_params,                              
+                              vis_params,
+                              figsize=None,                             
                               text=None, 
                               title_map=None,
                               label=None, 
                               save_fig=None,
-                              nogrid=None):
+                              nogrid=None,
+                              scale_bar=None):
     
     """Obtener gráficas con cartoee
     La variable zoom_region debe asignarse según la zona de estudio.
@@ -684,24 +725,29 @@ def get_grafica_cartoee_color(image,
     ]
     
     # Establecer figsize para plot
-    # fig = plt.figure(figsize=(5,5)) # Para juntar en forma de mosaicos
-    fig = plt.figure(figsize=(8,6)) # Para analizar
-    # fig = plt.figure(figsize=(16,12)) # Para recortar la barra
+    if figsize == None:
+        # fig = plt.figure(figsize=(5,5)) # Para juntar en forma de mosaicos
+        fig = plt.figure(figsize=(8,6)) # Para analizar
+        # fig = plt.figure(figsize=(16,12)) # Para recortar la barra
+    else:
+        fig = plt.figure(figsize=figsize) # Para analizar
     
     # ee.Image a plotear
     ax = cartoee.get_map(image, region=zoom_region, vis_params=vis_params)
 
     # Añadir grillas
-    if nogrid is None:
+    if nogrid == True:
+        ax.axis('off')
+    else:
         cartoee.add_gridlines(ax, 
                               interval=0.005, 
                               ytick_rotation=90, 
                               linestyle=":", 
                               linewidth=0 # Grillas invisibles
                               ) # xtick_rotation=45
-    
+
     # Añadir barra de color
-    if label is not None:
+    if label != None:
         cartoee.add_colorbar(ax, 
                              vis_params=vis_params, 
                              loc='right', 
@@ -712,36 +758,36 @@ def get_grafica_cartoee_color(image,
                              # drawedges=True, 
                              # extend='both', # Genera flechas hacia los extremos
                              )
-        ax.text(-79.77332525015065+2*extent, -6.5956, label, fontsize=12)
+        ax.text(-79.77332525015065+2*extent, -6.594549+2*extent, label, fontsize=12)
 
     # Añadir texto
-    if title_map is not None:
+    if title_map != None:
         ax.set_title(title_map) # , fontsize=11
         
-    if text is not None:
-        ax.text(-79.7872, -6.6056, text, fontsize=12) 
+    if text != None:
+        ax.text(-79.7872, -6.594549+2*extent, text, fontsize=16) 
         # fontsize=18 para mejor visibilidad en mosaicos
         
     # add scale bar
-    scale_bar_dict = {
-          "length": 100, 
-          "xy": (0.9, 0.05), 
-          "linewidth": 2,
-          "fontsize": 12,
-          "color": "black",
-          "unit": "m",
-          "ha": "center",
-          "va": "bottom",    
-    }
-    cartoee.add_scale_bar_lite(ax, **scale_bar_dict)
-    
+    if scale_bar != None:
+        scale_bar_dict = {
+            "length": 100, 
+            "xy": (0.9, 0.05), 
+            "linewidth": 2,
+            "fontsize": 12,
+            "color": "black",
+            "unit": "m",
+            "ha": "center",
+            "va": "bottom",    
+        }
+        cartoee.add_scale_bar_lite(ax, **scale_bar_dict)
+
     ax.tick_params(axis = 'both') # , labelsize = 9
     
     # Guardar graficas
-    if save_fig is not None:
-
+    if save_fig != None:
         ruta = r'C:/Users/usuario/Documents/00-notebooks-2022/output'
-        ruta_img = os.path.join(ruta, save_fig + '.jpg')
+        ruta_img = os.path.join(ruta, save_fig + '.png')
         plt.savefig(ruta_img, bbox_inches = 'tight', pad_inches = .1)#, dpi=400)
         # Recortar márgenes con ayuda de bbox_inches y pad_inches
 
@@ -767,7 +813,6 @@ def get_grafica_cartoee_color(image,
 # - Funciones para la selección de pixeles Frío y Caliente
 # ======================================================
 
-
 def recorte_por_percentiles(n1, n2, img_ndvi, img_ts, geometry, filtrado=None):
     
     """ Recortar mapas de temperatura en función de mapa NDVI para obtener pixeles candidatos.
@@ -788,17 +833,16 @@ def recorte_por_percentiles(n1, n2, img_ndvi, img_ts, geometry, filtrado=None):
 
     # 1. Procesar n1
     # Para NDVI > 0, retorna el percentil n1
-    perc_n1 = ee.Number(
-        img_ndvi
-        .updateMask(img_ndvi.gte(0))
-        .reduceRegion(ee.Reducer.percentile([n1]), geometry=geometry, scale=30)
-        .values()
+    perc_n1 = ee.Number(img_ndvi
+                        .updateMask(img_ndvi.gte(0))
+                        .reduceRegion(ee.Reducer.percentile([n1]), geometry=geometry, scale=30)
+                        .values()
         )
     
-    if filtrado is 'cold':
+    if filtrado == 'cold':
         # Pixel frío
         # Para los valores de ndvi mayores al percentil perc_n1, retornar sus temperaturas
-        ts_recortado_p_n1 = img_ts.updateMask(img_ndvi.gte(perc_n1))
+        ts_recortado_p_n1 = img_ts.updateMask(img_ndvi.gte(perc_n1)) # Temperatura
     else: 
         # Pixel caliente
         img_ndvi = img_ndvi.clip(geometry)
@@ -807,18 +851,69 @@ def recorte_por_percentiles(n1, n2, img_ndvi, img_ts, geometry, filtrado=None):
         ts_recortado_p_n1 = img_ts.updateMask(img_ndvi.lte(perc_n1))
         
     # 2. Procesar n2
-    perc_n2 = ee.Number(
-        ts_recortado_p_n1
-        .reduceRegion(ee.Reducer.percentile([n2]), geometry=geometry, scale=30)
-        .values()
+    perc_n2 = ee.Number(ts_recortado_p_n1
+                        .reduceRegion(ee.Reducer.percentile([n2]), geometry=geometry, scale=30)
+                        .values()
         )
     
-    if filtrado is 'cold':
+    if filtrado == 'cold':
         # Los valores más bajos de temperatura
         pixeles = ts_recortado_p_n1.updateMask(ts_recortado_p_n1.lte(perc_n2))
     else:
         # Los valores más altos de temperatura
         pixeles = ts_recortado_p_n1.updateMask(ts_recortado_p_n1.gte(perc_n2))
+            
+    return pixeles
+
+def recorte_por_percentiles_alb(n1, n2, img_ndvi, img_albedo, geometry, filtrado=None):
+    
+    """ Recortar mapas de temperatura en función de mapa NDVI para obtener pixeles candidatos.
+
+    Parametros
+    ----------
+    n1, n2 : int
+    img_ndvi : ee.Image
+    img_ts : ee.Image
+    geometry : ee.Geometry
+    filtrado : str
+
+    Retorna
+    -------
+    pixeles : ee.Image
+        Mapa recortado (por updateMask) de pixeles candidatos.
+    """
+
+    # 1. Procesar n1
+    # Para NDVI > 0, retorna el percentil n1
+    perc_n1 = ee.Number(img_ndvi
+                        .updateMask(img_ndvi.gte(0))
+                        .reduceRegion(ee.Reducer.percentile([n1]), geometry=geometry, scale=30)
+                        .values()
+        )
+    
+    if filtrado == 'cold':
+        # Pixel frío
+        # Para los valores de ndvi mayores al percentil perc_n1, retornar sus temperaturas
+        alb_recortado_p_n1 = img_albedo.updateMask(img_ndvi.gte(perc_n1)) # Albedo
+    else: 
+        # Pixel caliente
+        img_ndvi = img_ndvi.clip(geometry)
+        img_albedo = img_albedo.clip(geometry)
+        # Para los valores de ndvi menores al percentil perc_n1, retornar sus temperaturas
+        alb_recortado_p_n1 = img_albedo.updateMask(img_ndvi.lte(perc_n1))
+        
+    # 2. Procesar n2
+    perc_n2 = ee.Number(alb_recortado_p_n1
+                        .reduceRegion(ee.Reducer.percentile([n2]), geometry=geometry, scale=30)
+                        .values()
+        )
+    
+    if filtrado == 'cold':
+        # Los valores más bajos de temperatura
+        pixeles = alb_recortado_p_n1.updateMask(alb_recortado_p_n1.lte(perc_n2))
+    else:
+        # Los valores más altos de temperatura
+        pixeles = alb_recortado_p_n1.updateMask(alb_recortado_p_n1.gte(perc_n2))
             
     return pixeles
 
@@ -847,18 +942,20 @@ def get_pixel_values(punto, d2, img_productos):
         ['R_n', 'G', 'NDVI', 'LAI', 'Albedo', 'Ts', 'T_sw', 'e_0', 'Elev_m', 'Slope_d']
     """
     
+    # Extraer datos de pixeles mediante reductor
     pix_datos_extraidos = img_productos.reduceRegion(
         reducer=ee.Reducer.first(),
         geometry=punto,
         scale=30
     )
     
+    # Asignar los datos extraidos a variables
     pix_ndvi  = ee.Number(pix_datos_extraidos.get('NDVI'))
     pix_savi  = ee.Number(pix_datos_extraidos.get('SAVI'))
     pix_lai   = ee.Number(pix_datos_extraidos.get('LAI'))
     
-    pix_slope = ee.Number(pix_datos_extraidos.get('slope'))
-    pix_elev  = ee.Number(pix_datos_extraidos.get('elevation'))
+    pix_slope = ee.Number(pix_datos_extraidos.get('slope')) # Grados
+    pix_elev  = ee.Number(pix_datos_extraidos.get('elevation')) # m
     
     pix_alb   = ee.Number(pix_datos_extraidos.get('albedo'))
     pix_ts_K  = ee.Number(pix_datos_extraidos.get('Ts_k'))
@@ -866,14 +963,13 @@ def get_pixel_values(punto, d2, img_productos):
     
     pix_theta = ee.Number(pix_datos_extraidos.get('cos_theta'))
     pix_t_sw  = ee.Number(pix_datos_extraidos.get('t_sw'))
-    pix_e_0   = ee.Number(pix_datos_extraidos.get('e_0'))
-                       
+    pix_e_0   = ee.Number(pix_datos_extraidos.get('e_0'))                
     
-    # Radiación Neta R_n
-    R_n_calculated = ee.Number.expression(
+    # Procesar Radiación Neta Rn
+    Rn_calculated = ee.Number.expression(
         """
         (1-pix_alb)*1367*pix_theta/d2*pix_t_sw 
-        + pix_e_0*5.67*10**(-8)*( 0.85*(-pix_t_sw_log)**0.09 - 1 )*pix_ts_K_pow4
+        + pix_e_0*5.67*10**(-8)*( 0.85*(-pix_t_sw_log)**0.09 - 1 )*pix_ts_K**4
         """,
         {
             'pix_alb': pix_alb,
@@ -882,46 +978,39 @@ def get_pixel_values(punto, d2, img_productos):
             'pix_t_sw': pix_t_sw,
             'pix_t_sw_log': pix_t_sw.log(),
             'pix_e_0': pix_e_0,
-            'pix_ts_K_pow4': pix_ts_K.pow(4) # en K
+            'pix_ts_K': pix_ts_K 
         }
     )
     
-    # Flujo de Calor del Suelo G
-    # Forma 1: Using an empirical equation by Bastiaanssen (2000) representing values near midday 
-    # Depende de: Temperatura, Albedo, NDVI y Rn
+    # Procesar flujo de calor del suelo G
     
-    G_pix = ee.Number.expression(
-        '(Ts_K - 273.15)*(0.0038 + 0.0074*albedo)*(1-0.98*NDVI_pow4)*R_n_calculated',
-        {
-            'Ts_K': pix_ts_K,
-            'albedo': pix_alb,
-            'NDVI_pow4': pix_ndvi.pow(4),
-            'R_n_calculated': R_n_calculated
-        }
-    )
-    
+    # Forma 1: Bastiananssen (1995) representing values near midday.
+    # G_pix = ee.Number.expression(
+    #     '(Ts_K - 273.15)*(0.0038 + 0.0074*albedo)*(1-0.98*pix_ndvi**4)*Rn_calculated',
+    #     {
+    #         'Ts_K': pix_ts_K,
+    #         'albedo': pix_alb,
+    #         'pix_ndvi': pix_ndvi,
+    #         'Rn_calculated': Rn_calculated
+    #     }
+    # )
     
     # Forma 2: Tasumi (2003) using soil heat flux data collected by Wright (1982), 
     # USDA-ARS for irrigated crops near Kimberly, Idaho
-    
-    # if pix_lai.getInfo() < 0.5:
-    #     G_pix = ee.Number.expression(
-    #         '1.8*(pix_ts-273.15)+0.084*R_n_calculated', # (pix_ts-273.15) cuando pix_ts es en Kelvin para obtener °C
-    #         {'pix_ts':pix_ts,   # pix_ts está en K
-    #          'R_n_calculated':R_n_calculated
-    #          }
-    #         )
-    # else:
-    #     G_pix = ee.Number.expression(
-    #         '0.05 + 0.18*pix_lai*R_n_calculated',
-    #         {'pix_lai':pix_lai.multiply(-0.521).exp(),
-    #          'R_n_calculated':R_n_calculated
-    #          }
-    #         )
+    G_pix = ee.Number.expression(
+        '''
+        (pix_lai < 0.5) 
+            ? 1.8*(pix_ts_K - 273.15) + 0.084*Rn_calculated 
+            : (0.05 + 0.18*exp(-0.521*pix_lai))*Rn_calculated
+        ''', 
+        {
+            'pix_lai': pix_lai,
+            'pix_ts_K': pix_ts_K,
+            'Rn_calculated': Rn_calculated
+        })
     
     # Producir un diccionario para exportar
-
-    pix_values_list = ee.List([R_n_calculated, 
+    pix_values_list = ee.List([Rn_calculated, 
                                G_pix, 
                                pix_ndvi, 
                                pix_savi,
@@ -932,11 +1021,12 @@ def get_pixel_values(punto, d2, img_productos):
                                pix_t_sw,
                                pix_e_0,
                                pix_elev,
-                               pix_slope])
+                               pix_slope,
+                               pix_theta])
     
     columns = ['R_n', 'G', 'NDVI', 'SAVI', 'LAI', 
-               'Albedo', 'Ts_k', 'Ts',
-               'T_sw', 'e_0', 'Elev_m', 'Slope_d'] 
+               'Albedo', 'Ts_k', 'Ts_c',
+               'T_sw', 'e_0', 'Elev_m', 'Slope_d', 'cos_theta'] 
                         
     pix_values = ee.Dictionary.fromLists(columns, pix_values_list).getInfo()
     
@@ -1048,8 +1138,9 @@ def get_dT(pix_values, Inst_ETr, Kc, r_ah, air_dens):
     # Kc = 1.05 para pixel frio
     # Kc = 0 para pixel caliente 
     Cp = 1004 
-    Ts_c = pix_values['Ts_k']
-    lambda_LE = ( 2.501-0.00236*(Ts_c-273.15) ) * 10**6 # Eq 53
+    Ts = pix_values['Ts_k']
+    
+    lambda_LE = ( 2.501-0.00236*(Ts-273.15) ) * 10**6 # Eq 53
     LE = Inst_ETr * Kc * lambda_LE / 3600  # [W m-2]
     
     # 2. H a partir de balance de energía (Eq 1)
@@ -1069,6 +1160,9 @@ def get_dT(pix_values, Inst_ETr, Kc, r_ah, air_dens):
                   'H0' : H,
                   'dT0': dT}
     
+    # dT0 es producto de rah, p y H. con dT0 se obtiene los coeficientes a y b.
+    # dT1 se obtiene a partir de a, b y tsdem
+
     return resultados
 
 # 4. H final
@@ -1086,7 +1180,7 @@ def get_H(pixel_c, pixel_h):
     - H1 a partir de r_ah, dT1 y air_dens_p 
     """
 
-    # 1. Coeficientes a y b a partir de los dT obtenidos por pixel
+    # 1. Coeficientes a y b a partir de los dT0 obtenidos por pixel
     pix_c_dt = pixel_c['dT0'] 
     pix_h_dt = pixel_h['dT0'] 
     pix_c_Ts_dem = pixel_c['Ts_dem']
@@ -1095,25 +1189,18 @@ def get_H(pixel_c, pixel_h):
     a = (pix_h_dt - pix_c_dt)/(pix_h_Ts_dem - pix_c_Ts_dem) # Eq 48
     b = pix_c_dt - a * pix_c_Ts_dem  # a*Ts_dem + b = dT, Eq 49
 
-    # print(f'Coeficientes a y b\n a: {a}\n b: {b}')
-
     # 2. dT1 a partir de los coeficientes
     pix_c_dt1 = a*pix_c_Ts_dem + b
     pix_h_dt1 = a*pix_h_Ts_dem + b
 
-    # print(f'dT1\n pix_c: {pix_c_dt1}\n pix_h: {pix_h_dt1}')
-    # print(f"H antes\n pix_c: {pixel_c['H0']}\n pix_h: {pixel_h['H0']}")
-    
     # 3. H
     pix_c_H = pixel_c['air_dens_p']*1004*pix_c_dt1/pixel_c['r_ah']
     pix_h_H = pixel_h['air_dens_p']*1004*pix_h_dt1/pixel_h['r_ah']
     
-    # print(f'H después\n pix_c: {pix_c_H}\n pix_h: {pix_h_H}')
-    
     coeficientes = {'a_coef': a, 'b_coef': b}
     
-    pixel_c = {**pixel_c, **{'dT1': pix_c_dt1, 'H1': pix_c_H}, **coeficientes}
-    pixel_h = {**pixel_h, **{'dT1': pix_h_dt1, 'H1': pix_h_H}, **coeficientes}
+    pixel_c = {**pixel_c, **coeficientes, **{'dT1': pix_c_dt1, 'H1': pix_c_H}}
+    pixel_h = {**pixel_h, **coeficientes, **{'dT1': pix_h_dt1, 'H1': pix_h_H}}
     
     return pixel_c, pixel_h
 
@@ -1121,7 +1208,7 @@ def get_H(pixel_c, pixel_h):
 
 # El procesado inicial genera los valores que se ingresarán a la sección iterativa
 
-def procesado_inicial(pixel_values, filtrado_ws, filtrado_ETr, Kc):
+def procesado_inicial(pixel_values, elev_station, filtrado_ws, filtrado_ETr, Kc):
     
     '''Procesa datos de pixeles escogidos y de estación meteorológica.
     
@@ -1137,20 +1224,20 @@ def procesado_inicial(pixel_values, filtrado_ws, filtrado_ETr, Kc):
 
     # Selección de parámetros
     pixel_elev = pixel_values['Elev_m']
-    pixel_ts = pixel_values['Ts_k'] # °K
+    pixel_ts = pixel_values['Ts_k'] # K
 
     # 1. Ts_dem
-    Tlapse_rate = 6.5   # C/km
-    Elev_station = 2.9  # m
-    Ts_dem = pixel_ts + Tlapse_rate/1000*(pixel_elev-Elev_station) # K
+    Tlapse_rate = 6.5   # °C/km
+    Ts_dem = pixel_ts + Tlapse_rate/1000*(pixel_elev-elev_station) # K
 
 
     # 2. Emisividad e broadband
+
     # 2.1. Z_om : Momentum roughness length 
     pixel_lai = pixel_values['LAI']
-    pixel_slope = pixel_values['Slope_d']
+    pixel_slope = pixel_values['Slope_d'] # grados
 
-    # Flat model momemtum roughnes length
+    # Flat model momemtum roughness length
     if pixel_lai < 0.2778:
         Z_om_flat = 0.005 # m
         # represents roughness typical of bare agricultural soils
@@ -1177,7 +1264,7 @@ def procesado_inicial(pixel_values, filtrado_ws, filtrado_ETr, Kc):
     # filtrado_ws: Velocidad del viento medido por estación meteorológica a las 10:30 [Kh/hr]
     blending_h = 200 
     u_w = filtrado_ws*1000/3600 # [m/s]
-    z_x = Elev_station  # altura del anemómetro, varía de 2 a 2.80m (relativo a cada estación)
+    z_x = elev_station  # altura del anemómetro, varía de 2 a 2.80m (relativo a cada estación)
     u_200 = u_w*math.log(blending_h/z_om_w)/math.log(z_x/z_om_w) # [m/s]    
         
     # 3.2. u*1: Friction velocity (eq 31)
@@ -1193,8 +1280,15 @@ def procesado_inicial(pixel_values, filtrado_ws, filtrado_ETr, Kc):
     # 6. dT (eq 28)
     resultado1 = get_dT(pixel_values, filtrado_ETr, Kc, r_ah, air_dens_p)
     
+    # resultado1
+    # {'R_n': R_n, 
+    #  'G' : G,
+    #  'LE': LE,
+    #  'H0' : H,
+    #  'dT0': dT}
+
     resultado2 = {
-        'Ts': pixel_ts,   # Temperatura del pixel 
+        'Ts_k': pixel_ts,   # Temperatura del pixel 
         'Ts_dem': Ts_dem, # Temperatura corregida por elevación
         'Z_om': Z_om,
         'u_200': u_200,
@@ -1224,7 +1318,7 @@ def stability_corr(pixel_procesado):
     H1 = pixel_procesado['H1']
     air_dens = pixel_procesado['air_dens_p']
     u_star = pixel_procesado['u*']
-    Ts_k = pixel_procesado['Ts']
+    Ts_k = pixel_procesado['Ts_k']
     Cp = 1004
     
     # The Monin-Obukhov length (L) defines 
@@ -1238,11 +1332,11 @@ def stability_corr(pixel_procesado):
     # When L<0, the lower atmospheric boundary layer is unstable
     # and when L>0, the boundary layer is stable
    
-   # Stable conditions
+    # Stable conditions
     if L > 0:  
-        x200m = -5*2/L
-        x2m   = -5*2/L
-        x01m  = -5*0.1/L
+        y200m = -5*2/L
+        yhz2  = -5*2/L
+        yhz1  = -5*0.1/L
     
     # Unstable conditions
     else:      
@@ -1258,7 +1352,9 @@ def stability_corr(pixel_procesado):
         x01m = (1-16*0.1/L)**0.25
         yhz1 = 2*math.log((1+x01m**2)/2)
     
+    # Resultados
     valores_L = {
+        'L': L,
         'y200m': y200m,
         'yhz2': yhz2,
         'yhz1': yhz1
@@ -1268,9 +1364,9 @@ def stability_corr(pixel_procesado):
 
 
 
-# 2da iteracion
+# N iteraciones
 
-def iteracion(u_200, pixel_procesado, pixel_valores, pixel_stability_cor, H0):
+def iteracion(u_200, pixel_procesado, pixel_valores, H0):
 
     """ Iterar parámetros de entrada para obtener r_ah corregido por estabilidad.
 
@@ -1289,158 +1385,91 @@ def iteracion(u_200, pixel_procesado, pixel_valores, pixel_stability_cor, H0):
     output: dict
         Resultados de iteración.
     """
-    
+    # Valores iniciales a partir de pixel procesado
+    z_om = pixel_procesado['Z_om']
+    ts_k = pixel_procesado['Ts_k']
+    dt0  = pixel_procesado['dT0']
+
     # Procesar parametros para obtener dT
-    u_star_adj = get_u_star(u_200, pixel_procesado['Z_om'], correccion=pixel_stability_cor)
+    u_star_adj = get_u_star(u_200, z_om, correccion=pixel_procesado)
     
-    r_ah_adj = get_rah(u_star_adj, correccion=pixel_stability_cor)
+    r_ah_adj = get_rah(u_star_adj, correccion=pixel_procesado)
     
     # Densidad del aire (depende del dT0 de la iteracion anterior)
     p_adj = get_air_dens(pixel_valores['Elev_m'], 
-                         air_temp_K=pixel_procesado['Ts']-pixel_procesado['dT0']+273.15)
+                         air_temp_K=ts_k-dt0)
     
+    # Procesar dT
     dT = r_ah_adj * H0 /(p_adj * 1004)
 
     # Output
     output = {
-        'Ts': pixel_procesado['Ts'],
+        'Ts_k': pixel_procesado['Ts_k'],
         'Ts_dem': pixel_procesado['Ts_dem'], # Añadido para obtener H
         'Z_om': pixel_procesado['Z_om'],
         'u*': u_star_adj,
         'r_ah': r_ah_adj,
-        'air_dens_p' : p_adj,
-        'dT0': dT
+        'dT0': dT,
+        'air_dens_p': p_adj
     }
 
     return output
 
 
-
-def guardar_resultados(lista_a_guardar, pixel_a_extraer, lista_variables):
+def parte_iterativa(n_iteraciones, 
+                    elev_station,
+                    pix_f_values, pix_c_values, 
+                    dato_ws, dato_et):
     
     '''
-    Retorna list
-    '''
+    Realizar primera y n iteraciones que se indique. 
 
-    n_ciclos = len(lista_variables)
-    
-    for i in range(n_ciclos):
-        valor = pixel_a_extraer[lista_variables[i]]
-        lista_a_guardar[i].append(valor)
-        
-    return lista_a_guardar
-
-
-def parte_iterativa(fin_iteraciones, 
-                    pix_c_values, pix_h_values, 
-                    filtrado_ws, filtrado_et):
-    
-    '''
-    Realizar primera, segunda y n iteraciones. 
-
-    Retorna diccionario
-    - dict_pix_f_resultados
-    - dict_pix_c_resultados
-    - list_coef_resultados
-    - u_200': u_200
-    - list_stability_resultados
+    Retorna diccionario con información de iteraciones. 
+    - Temperatura y Temperatura corregida por dem
+    - Z_om, u_200, u*, r_ah, air_dens
+    - Coeficientes a y b
+    - Valores de corrección por estabilidad L, y200m, yhz2, yhz1
     '''
 
     # Establecer listas de inicio
-
-    list_pix_f_resultados = [[], [], []]
-    list_pix_c_resultados = [[], [], []]
-    list_variables = ['r_ah', 'air_dens_p', 'dT0']
-
-    list_coef_resultados = [[], []]
-    list_variables_coef = ['a_coef', 'b_coef']
-    
-    list_stability_resultados = []
-    
+    resultados_f = []
+    resultados_c = []
 
     # 1er Iteración: Condición estable de la atmóstfera
 
-    pix_c_procesado_inicial = procesado_inicial(pix_c_values, filtrado_ws, filtrado_et, Kc=1.05)
-    pix_h_procesado_inicial = procesado_inicial(pix_h_values, filtrado_ws, filtrado_et, Kc=0) 
+    pix_f_procesadoinicial = procesado_inicial(pix_f_values, elev_station, dato_ws, dato_et, Kc=1.05)
+    pix_c_procesadoinicial = procesado_inicial(pix_c_values, elev_station, dato_ws, dato_et, Kc=0) 
 
-    u_200 = pix_c_procesado_inicial['u_200']
+    u_200 = pix_f_procesadoinicial['u_200']
 
-    list_pix_f_resultados = guardar_resultados(list_pix_f_resultados, pix_c_procesado_inicial, list_variables)
-    list_pix_c_resultados = guardar_resultados(list_pix_c_resultados, pix_h_procesado_inicial, list_variables)
+    pix_f_procesado, pix_c_procesado = get_H(pix_f_procesadoinicial, pix_c_procesadoinicial)
 
-    pix_c_procesado, pix_h_procesado = get_H(pix_c_procesado_inicial, pix_h_procesado_inicial)
-
-    list_coef_resultados = guardar_resultados(list_coef_resultados, pix_c_procesado, list_variables_coef)
-
+    pix_f_stability_cor = stability_corr(pix_f_procesado)
     pix_c_stability_cor = stability_corr(pix_c_procesado)
-    pix_h_stability_cor = stability_corr(pix_h_procesado)
     
-    list_stability_resultados.append(pix_h_stability_cor)
+    resultados_f.append({**{'iter':1}, **pix_f_procesado, **pix_f_stability_cor})
+    resultados_c.append({**{'iter':1}, **pix_c_procesado, **pix_c_stability_cor})
 
-    
-    # 2da iteración
-    
-    pix_c_iter = iteracion(u_200, pix_c_procesado, pix_c_values, pix_c_stability_cor, pix_c_procesado_inicial['H0'])
-    pix_h_iter = iteracion(u_200, pix_h_procesado, pix_h_values, pix_h_stability_cor, pix_h_procesado_inicial['H0'])
-
-    list_pix_f_resultados = guardar_resultados(list_pix_f_resultados, pix_c_iter, list_variables)
-    list_pix_c_resultados = guardar_resultados(list_pix_c_resultados, pix_h_iter, list_variables)
-
-    pix_c_post_iter, pix_h_post_iter = get_H(pix_c_iter, pix_h_iter)
-
-    list_coef_resultados = guardar_resultados(list_coef_resultados, pix_c_post_iter, list_variables_coef)
-
-    pix_c_stability_cor = stability_corr(pix_c_post_iter)
-    pix_h_stability_cor = stability_corr(pix_h_post_iter)
-
-    list_stability_resultados.append(pix_h_stability_cor)
-    
-
-    # Proceso Iterativo (es necesario realizar una iteracion para luego utilizar el bucle while)
+    # Parte iterativa: N Iteraciones 
     x = 0
 
-    while x < fin_iteraciones:
+    while x < n_iteraciones-1:
 
-        pix_c_iter = iteracion(u_200, pix_c_post_iter, pix_c_values, pix_c_stability_cor, pix_c_procesado_inicial['H0'])
-        pix_h_iter = iteracion(u_200, pix_h_post_iter, pix_h_values, pix_h_stability_cor, pix_h_procesado_inicial['H0'])
+        pix_f_iter = iteracion(u_200, resultados_f[-1], pix_f_values, pix_f_procesadoinicial['H0'])
+        pix_c_iter = iteracion(u_200, resultados_c[-1], pix_c_values, pix_c_procesadoinicial['H0'])
 
-        list_pix_f_resultados = guardar_resultados(list_pix_f_resultados, pix_c_iter, list_variables)
-        list_pix_c_resultados = guardar_resultados(list_pix_c_resultados, pix_h_iter, list_variables)
+        pix_f_post_iter, pix_c_post_iter = get_H(pix_f_iter, pix_c_iter)
 
-        pix_c_post_iter, pix_h_post_iter = get_H(pix_c_iter, pix_h_iter)
-
-        list_coef_resultados = guardar_resultados(list_coef_resultados, pix_c_post_iter, list_variables_coef)
-
+        pix_f_stability_cor = stability_corr(pix_f_post_iter)
         pix_c_stability_cor = stability_corr(pix_c_post_iter)
-        pix_h_stability_cor = stability_corr(pix_h_post_iter)
-        
-        list_stability_resultados.append(pix_h_stability_cor)
+
+        resultados_f.append({**{'iter':x+2}, **pix_f_post_iter, **pix_f_stability_cor})
+        resultados_c.append({**{'iter':x+2}, **pix_c_post_iter, **pix_c_stability_cor})
 
         x+=1
 
-    # print(f'{x} iteraciones realizadas!')
+    return resultados_f, resultados_c
 
-
-    # Elaborando los diccionarios para ploteo
-    dict_pix_f_resultados = {}
-    dict_pix_c_resultados = {}
-
-    for i in range(3):
-        dict_pix_f_resultados[list_variables[i]] = list_pix_f_resultados[i]
-        dict_pix_c_resultados[list_variables[i]] = list_pix_c_resultados[i]
-    
-    output = {
-        'dict_pix_f_resultados': dict_pix_f_resultados,
-        'dict_pix_c_resultados': dict_pix_c_resultados,
-        'list_coef_resultados': list_coef_resultados,
-        'u_200': u_200,
-        'list_stability_resultados': list_stability_resultados
-    }
-
-    return output
-
-    # pd.DataFrame(resultados_pix_c_dict).to_csv('resultados_pix_c_csv.csv')
-    # pd.DataFrame(resultados_pix_h_dict).to_csv('resultados_pix_h_csv.csv')
 
 def get_grafica_iteracion(fecha, 
                           resultados_dict, 
@@ -1478,10 +1507,12 @@ def get_grafica_iteracion(fecha,
         fig.savefig(ruta+nombre_img) # ,dpi=400)
 
 
-def get_H_corregido(img_productos_clipped, iteracion_output):
+def get_H_corregido(img_productos_clipped, iteracion_output, dem, elev_station):
     
     """ Función aerodinámica para estimar el parámetro H
     
+    Retorna:
+    img_H: ee.Image
     """
     
     # =====================================================
@@ -1491,25 +1522,20 @@ def get_H_corregido(img_productos_clipped, iteracion_output):
     img_tempK = img_productos_clipped.select('Ts_k')
     img_tempC = img_productos_clipped.select('Ts_c')
     img_lai = img_productos_clipped.select('LAI')
-    img_slope = img_productos_clipped.select('slope')
 
-    dem = ee.Image("USGS/SRTMGL1_003")
-    
     # Resultados de proceso iterativo
-    resultados_coef = iteracion_output['list_coef_resultados']
-    u_200 = iteracion_output['u_200']
-    list_stability_result = iteracion_output['list_stability_resultados']
+    u_200 = iteracion_output[0]['u_200']
     
     # =====================================================
     # Sensible Heat Flux H
 
     # 1. dT
     # 1.1. Ts_dem
-    Ts_dem = img_tempC.expression('img_tempK + Tlapse_rate/1000*(dem_elev-elev_station)',
-                                  {'img_tempK': img_tempC,
+    Ts_dem = img_tempK.expression('img_tempK + Tlapse_rate/1000*(dem_elev-elev_station)',
+                                  {'img_tempK': img_tempK,
                                    'Tlapse_rate': 6.5,
                                    'dem_elev': dem,
-                                   'elev_station': 3})
+                                   'elev_station': elev_station})
 
     # Observar como actúa la corrección por temperatura usando el DEM
     # display(get_stats(img_tempC, predios_agricolas, 30))
@@ -1517,15 +1543,14 @@ def get_H_corregido(img_productos_clipped, iteracion_output):
 
 
     # 1.2. dT (para temperaturas en K)
-    coef_a = resultados_coef[0][-1] 
-    coef_b = resultados_coef[1][-1] 
+    coef_a = iteracion_output[-1]['a_coef'] 
+    coef_b = iteracion_output[-1]['b_coef'] 
 
     # img_dT = b + a*Ts_dem
     img_dT = Ts_dem.expression('b + a*Ts_dem',
                                {'a': coef_a, 'b': coef_b, 'Ts_dem': Ts_dem}).rename('dT')
 
     # get_stats(img_dT, predios_agricolas, 30)
-
 
     # 2. Air density
     air_pressureP = dem.expression(
@@ -1534,8 +1559,8 @@ def get_H_corregido(img_productos_clipped, iteracion_output):
 
     air_dens_p = air_pressureP.expression(
         '1000*air_pressureP/(1.01*(air_tempK)*287)',
-        {'air_pressureP':air_pressureP,
-         'air_tempK':img_tempK.subtract(img_dT)}).rename('air_dens')
+        {'air_pressureP': air_pressureP,
+         'air_tempK': img_tempK.subtract(img_dT)}).rename('air_dens')
 
     # get_stats(air_dens_p, predios_agricolas, 30)
 
@@ -1546,6 +1571,7 @@ def get_H_corregido(img_productos_clipped, iteracion_output):
     # Flat model momemtum roughnes length
     # img_lai < 0.2778 -> Z_om = 0.005 # represents roughness typical of bare agricultural soils
     # img_lai >= 0.2778 -> Z_om = 0.018*img_lai
+    # img_zom1 = img_lai.multiply(0.018)
     img_zom1 = img_lai.where(img_lai.gte(0.2778), img_lai.multiply(0.018)).where(img_lai.lt(0.2778), 0.005).rename('Z_om')
     # get_stats(img_zom1, predios_agricolas, 30)
 
@@ -1557,12 +1583,12 @@ def get_H_corregido(img_productos_clipped, iteracion_output):
     img_ustar = img_zom1.expression('0.41*u_200/( log(200/zom) - y200m )',
                                     {'u_200': u_200,
                                      'zom': img_zom1,
-                                     'y200m': list_stability_result[-1]['y200m']}).rename('u_star')
+                                     'y200m': iteracion_output[-1]['y200m']}).rename('u_star')
 
-    img_rah = img_ustar.expression('( log(2/0.1) - yhz2 + yhz1 )/(img_ustar*0.41)', 
-                                   {'yhz2': list_stability_result[-1]['yhz2'],
-                                    'yhz1': list_stability_result[-1]['yhz1'],
-                                    'img_ustar':img_ustar}).rename('r_ah')
+    img_rah = img_ustar.expression('( log(2/0.1) - yhz2 + yhz1 )/(img_ustar*0.41)',
+                                   {'yhz2': iteracion_output[-1]['yhz2'],
+                                    'yhz1': iteracion_output[-1]['yhz1'],
+                                    'img_ustar': img_ustar}).rename('r_ah')
 
     # get_stats(img_rah, predios_agricolas, 30)
 
@@ -1570,3 +1596,39 @@ def get_H_corregido(img_productos_clipped, iteracion_output):
     img_H = air_dens_p.multiply(1004).multiply(img_dT).divide(img_rah).rename('H')
 
     return img_H
+
+
+# Utilitarios
+
+def grafica_coefs(df_resultados, fecha, coef_a, coef_b, save_files=None):
+
+    # Gráfica 1x2
+    fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
+
+    axs[0].plot(df_resultados['iter'], df_resultados['a_coef'])
+    axs[0].axhline(0, color='black', alpha=.2)
+    axs[0].set(title=f'{fecha}\nCoeficiente a: {coef_a:.3f}', ylabel='Valores', xlabel='Iteraciones')
+    axs[0].grid(alpha=0.2)
+    
+    axs[1].plot(df_resultados['iter'], df_resultados['b_coef'])
+    axs[1].axhline(0, color='black', alpha=.2)
+    axs[1].set(title=f'{fecha}\nCoeficiente b: {coef_b:.3f}', xlabel='Iteraciones')
+    axs[1].grid(alpha=0.2)
+
+    if save_files == True:
+        fig.savefig(f'output/{fecha}_coefs.png')
+
+    plt.show()
+
+
+
+def tabla_coefs(lista_imgs, n_imgs, lista_nombres):
+    
+    lista_pixeles = []
+    for index in range(n_imgs):
+        pixeles = lista_imgs[index]['pixeles']
+        lista_pixeles.append(pixeles)
+
+    df_pixeles = pd.DataFrame(lista_pixeles, index=lista_nombres)
+
+    return df_pixeles
