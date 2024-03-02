@@ -476,7 +476,7 @@ def getRadiacionNeta(img_ee, roi, dem, lai_method, albedo_method, HR):
 
     # Fechas
     img_date = img_ee.date() # ee.Date
-    doy = img_date.getRelative('day', 'year') # ee.Number
+    doy = img_date.getRelative('day', 'year').add(1) # ee.Number
     fecha = img_date.format('YYYY-MM-dd').getInfo() # string
 
     # =================================================================
@@ -509,15 +509,15 @@ def getRadiacionNeta(img_ee, roi, dem, lai_method, albedo_method, HR):
                                       ).rename('LAI') # Usando 30 datos
 
 
-    img_lai = img_lai.where(img_lai.lte(0), 0)
+    # img_lai = img_lai.where(img_lai.lte(0), 0)
     
     # A partir del DEM: Pendiente y Aspect [rad]
     img_dem_clippped = dem.clip(roi)
-    img_slopes = ee.Terrain.slope(img_dem_clippped) # grados
-    img_slopes_rad = img_slopes.multiply(factor_rad)  # ee.Image, radianes 
+    img_slopes = ee.Terrain.slope(img_dem_clippped)  # grados
+    img_slopes_rad = img_slopes.multiply(factor_rad) # ee.Image, radianes 
         
     img_aspect = ee.Terrain.aspect(img_dem_clippped) # grados
-    img_aspect_rad = img_aspect.multiply(factor_rad)  # ee.Image, radianes
+    img_aspect_rad = img_aspect.multiply(factor_rad) # ee.Image, radianes
 
 
     # Ángulos Declinación, Latitud y Horario [rad]
@@ -703,14 +703,12 @@ def get_stats(img, geometry, scale):
 
 
 def get_grafica_cartoee_color(image, 
-                              vis_params,
-                              figsize=None,                             
+                              vis_params,                              
                               text=None, 
                               title_map=None,
                               label=None, 
                               save_fig=None,
-                              nogrid=None,
-                              scale_bar=None):
+                              nogrid=None):
     
     """Obtener gráficas con cartoee
     La variable zoom_region debe asignarse según la zona de estudio.
@@ -725,20 +723,15 @@ def get_grafica_cartoee_color(image,
     ]
     
     # Establecer figsize para plot
-    if figsize == None:
-        # fig = plt.figure(figsize=(5,5)) # Para juntar en forma de mosaicos
-        fig = plt.figure(figsize=(8,6)) # Para analizar
-        # fig = plt.figure(figsize=(16,12)) # Para recortar la barra
-    else:
-        fig = plt.figure(figsize=figsize) # Para analizar
+    # fig = plt.figure(figsize=(5,5)) # Para juntar en forma de mosaicos
+    fig = plt.figure(figsize=(8,6)) # Para analizar
+    # fig = plt.figure(figsize=(16,12)) # Para recortar la barra
     
     # ee.Image a plotear
     ax = cartoee.get_map(image, region=zoom_region, vis_params=vis_params)
 
     # Añadir grillas
-    if nogrid == True:
-        ax.axis('off')
-    else:
+    if nogrid is None:
         cartoee.add_gridlines(ax, 
                               interval=0.005, 
                               ytick_rotation=90, 
@@ -747,7 +740,7 @@ def get_grafica_cartoee_color(image,
                               ) # xtick_rotation=45
 
     # Añadir barra de color
-    if label != None:
+    if label is not None:
         cartoee.add_colorbar(ax, 
                              vis_params=vis_params, 
                              loc='right', 
@@ -758,36 +751,36 @@ def get_grafica_cartoee_color(image,
                              # drawedges=True, 
                              # extend='both', # Genera flechas hacia los extremos
                              )
-        ax.text(-79.77332525015065+2*extent, -6.594549+2*extent, label, fontsize=12)
+        ax.text(-79.77332525015065+2*extent, -6.5956, label, fontsize=12)
 
     # Añadir texto
-    if title_map != None:
+    if title_map is not None:
         ax.set_title(title_map) # , fontsize=11
         
-    if text != None:
-        ax.text(-79.7872, -6.594549+2*extent, text, fontsize=16) 
+    if text is not None:
+        ax.text(-79.7872, -6.6056, text, fontsize=12) 
         # fontsize=18 para mejor visibilidad en mosaicos
         
     # add scale bar
-    if scale_bar != None:
-        scale_bar_dict = {
-            "length": 100, 
-            "xy": (0.9, 0.05), 
-            "linewidth": 2,
-            "fontsize": 12,
-            "color": "black",
-            "unit": "m",
-            "ha": "center",
-            "va": "bottom",    
-        }
-        cartoee.add_scale_bar_lite(ax, **scale_bar_dict)
-
+    scale_bar_dict = {
+          "length": 100, 
+          "xy": (0.9, 0.05), 
+          "linewidth": 2,
+          "fontsize": 12,
+          "color": "black",
+          "unit": "m",
+          "ha": "center",
+          "va": "bottom",    
+    }
+    cartoee.add_scale_bar_lite(ax, **scale_bar_dict)
+    
     ax.tick_params(axis = 'both') # , labelsize = 9
     
     # Guardar graficas
-    if save_fig != None:
+    if save_fig is not None:
+
         ruta = r'C:/Users/usuario/Documents/00-notebooks-2022/output'
-        ruta_img = os.path.join(ruta, save_fig + '.png')
+        ruta_img = os.path.join(ruta, save_fig + '.jpg')
         plt.savefig(ruta_img, bbox_inches = 'tight', pad_inches = .1)#, dpi=400)
         # Recortar márgenes con ayuda de bbox_inches y pad_inches
 
@@ -1503,7 +1496,7 @@ def get_grafica_iteracion(fecha,
     # Guardar gráfica
     if save_fig is True:
         ruta = f'output/{fecha}/'
-        nombre_img = f'{fecha} - {title_name}.jpg'
+        nombre_img = f'{fecha} - {title_name}.png'
         fig.savefig(ruta+nombre_img) # ,dpi=400)
 
 
@@ -1615,14 +1608,14 @@ def grafica_coefs(df_resultados, fecha, coef_a, coef_b, save_files=None):
     axs[1].set(title=f'{fecha}\nCoeficiente b: {coef_b:.3f}', xlabel='Iteraciones')
     axs[1].grid(alpha=0.2)
 
-    if save_files == True:
+    if save_files != None:
         fig.savefig(f'output/{fecha}_coefs.png')
 
     plt.show()
 
 
 
-def tabla_coefs(lista_imgs, n_imgs, lista_nombres):
+def tabla_coefs(lista_imgs, n_imgs, lista_nombres, save_files=None):
     
     lista_pixeles = []
     for index in range(n_imgs):
@@ -1631,4 +1624,7 @@ def tabla_coefs(lista_imgs, n_imgs, lista_nombres):
 
     df_pixeles = pd.DataFrame(lista_pixeles, index=lista_nombres)
 
+    if save_files != None:
+        df_pixeles.to_csv(save_files)
+        
     return df_pixeles
