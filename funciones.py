@@ -497,7 +497,14 @@ def getRadiacionNeta(img_ee, roi, dem, lai_method, albedo_method, HR):
         img_savi = get_savi_L8(img_toa, L=0.5)
         img_lai  = get_lai_L8(img_savi)
     
-    # Obtener LAI mediante relación NDVI - IAF
+    
+    if lai_method == 4:
+        img_savi = get_savi_L8(img_toa, L=0.5)
+        img_lai = img_savi.where(img_savi.lte(0.817), img_savi.pow(3).multiply(11))
+        img_lai = img_lai.where(img_savi.gt(0.817), 6).rename('LAI')
+    
+            
+    # Obtener LAI mediante relación NDVI - IAF (metodo 2 y 3)
     if lai_method == 2:
         img_savi = get_savi_L8(img_toa) 
         img_lai = img_ndvi.multiply(2.1362).add(0.0869).rename('LAI') # Usando 10 datos (1 fecha - excel de Martin)
@@ -508,6 +515,7 @@ def getRadiacionNeta(img_ee, roi, dem, lai_method, albedo_method, HR):
                                       {'img_ndvi': img_ndvi.select('NDVI')}
                                       ).rename('LAI') # Usando 30 datos
 
+        
 
     # img_lai = img_lai.where(img_lai.lte(0), 0)
     
@@ -1609,15 +1617,55 @@ def grafica_coefs(df_resultados, fecha, coef_a, coef_b, save_files=None):
     axs[1].grid(alpha=0.2)
 
     if save_files != None:
-        fig.savefig(f'output/{fecha}_coefs.png')
+        fig.savefig(save_files, bbox_inches = 'tight', pad_inches = .1)
 
     plt.show()
 
+
+def tabla_pixeles(lista_imgprocesadas_ET, save_files=None):
+    
+    lista_fechas = ['13-Ene', '29-Ene', '10-Mar', '03-Abr', '05-May', '21-May', '14-Jun']
+
+    df_base = pd.DataFrame()
+    
+    for index, img in enumerate(lista_imgprocesadas_ET):
+        
+        img_select_pixf = img['pixeles_stats']['PixF']
+        img_select_pixc = img['pixeles_stats']['PixC']
+
+        datos1 = {'Fecha': lista_fechas[index], 
+                 'Pixel': 'P. Frío',
+                 'Longitud': img_select_pixf['Longitud'], 
+                 'Latitud' : img_select_pixf['Latitud'],
+                 'NDVI': img_select_pixf['NDVI'],
+                 'Albedo': img_select_pixf['Albedo'],
+                 'Ts (K)': img_select_pixf['Ts_k'],
+                 'a': img['pixeles']['coef_a'],
+                 'b': img['pixeles']['coef_b']}
+
+        datos2 = {'Fecha': lista_fechas[index], 
+                 'Pixel': 'P. Cal.',
+                 'Longitud': img_select_pixc['Longitud'], 
+                 'Latitud' : img_select_pixc['Latitud'],
+                 'NDVI': img_select_pixc['NDVI'],
+                 'Albedo': img_select_pixc['Albedo'],
+                 'Ts (K)': img_select_pixc['Ts_k'],
+                 'a': img['pixeles']['coef_a'],
+                 'b': img['pixeles']['coef_b']}
+
+        df = pd.DataFrame(data=[datos1, datos2])
+        df_base = pd.concat([df_base, df])
+        
+    if save_files != None:
+        df_base.to_csv(save_files, index=False, encoding='utf-8-sig')
+            
+    return df_base
 
 
 def tabla_coefs(lista_imgs, n_imgs, lista_nombres, save_files=None):
     
     lista_pixeles = []
+    
     for index in range(n_imgs):
         pixeles = lista_imgs[index]['pixeles']
         lista_pixeles.append(pixeles)
