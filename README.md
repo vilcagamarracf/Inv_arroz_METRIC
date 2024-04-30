@@ -15,7 +15,7 @@ El presente repositorio alberga el código usado para estimar evapotranspiració
 
 Ubicación de la región Lambayeque en la costa norte del Perú (a), ubicación de la zona de estudio en la provincia y distrito Ferreñafe, región Lambayeque (b), y su delimitación en el Fundo Zapote Figueroa (c). Ciclo de cultivo enero-junio 2022. 
 
-<img src="ET_mosaico.png" alt="ET_mosaico" width='65%'/>
+<img src="figures/ET_mosaico.png" alt="ET_mosaico" width='65%'/>
 
 Resultados obtenidos del modelo METRIC para las fechas evaluadas. 
 
