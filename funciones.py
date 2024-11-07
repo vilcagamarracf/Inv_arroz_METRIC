@@ -1606,14 +1606,19 @@ def grafica_coefs(df_resultados, fecha, coef_a, coef_b, save_files=None):
     # Gráfica 1x2
     fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
 
-    axs[0].plot(df_resultados['iter'], df_resultados['a_coef'])
+    # Coeficiente a
+    axs[0].plot(df_resultados['iter'], df_resultados['a_coef'], 'r.-')
     axs[0].axhline(0, color='black', alpha=.2)
-    axs[0].set(title=f'{fecha}\nCoeficiente a: {coef_a:.3f}', ylabel='Valores', xlabel='Iteraciones')
+    axs[0].set(title=f'{fecha}\nCoeficiente a: {coef_a:.3f}', 
+               ylabel='Valores', 
+               xlabel='Iteraciones')
     axs[0].grid(alpha=0.2)
     
-    axs[1].plot(df_resultados['iter'], df_resultados['b_coef'])
+    # Coeficiente b
+    axs[1].plot(df_resultados['iter'], df_resultados['b_coef'], 'b.-')
     axs[1].axhline(0, color='black', alpha=.2)
-    axs[1].set(title=f'{fecha}\nCoeficiente b: {coef_b:.3f}', xlabel='Iteraciones')
+    axs[1].set(title=f'{fecha}\nCoeficiente b: {coef_b:.3f}', 
+               xlabel='Iteraciones')
     axs[1].grid(alpha=0.2)
 
     if save_files != None:
@@ -1622,9 +1627,11 @@ def grafica_coefs(df_resultados, fecha, coef_a, coef_b, save_files=None):
     plt.show()
 
 
-def tabla_pixeles(lista_imgprocesadas_ET, save_files=None):
+def tabla_pixeles(lista_imgprocesadas_ET, 
+                  lista_fechas,
+                  save_files=None):
     
-    lista_fechas = ['13-Ene', '29-Ene', '10-Mar', '03-Abr', '05-May', '21-May', '14-Jun']
+    # lista_fechas = ['13-Ene', '29-Ene', '10-Mar', '03-Abr', '05-May', '21-May', '14-Jun']
 
     df_base = pd.DataFrame()
     
@@ -1640,6 +1647,7 @@ def tabla_pixeles(lista_imgprocesadas_ET, save_files=None):
                  'NDVI': img_select_pixf['NDVI'],
                  'Albedo': img_select_pixf['Albedo'],
                  'Ts (K)': img_select_pixf['Ts_k'],
+                 'IAF': img_select_pixf['LAI'],
                  'a': img['pixeles']['coef_a'],
                  'b': img['pixeles']['coef_b']}
 
@@ -1650,6 +1658,7 @@ def tabla_pixeles(lista_imgprocesadas_ET, save_files=None):
                  'NDVI': img_select_pixc['NDVI'],
                  'Albedo': img_select_pixc['Albedo'],
                  'Ts (K)': img_select_pixc['Ts_k'],
+                 'IAF': img_select_pixc['LAI'],
                  'a': img['pixeles']['coef_a'],
                  'b': img['pixeles']['coef_b']}
 
