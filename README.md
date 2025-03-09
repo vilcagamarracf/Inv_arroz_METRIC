@@ -9,9 +9,9 @@
 </p>
 
 ## Descripción 
-El presente repositorio alberga el código usado para estimar evapotranspiración en cultivos de arroz en el distrito de Ferreñafe, usando el modelo METRIC ([Allen et al., 2007](https://www.researchgate.net/publication/228615269_Satellite-Based_Energy_Balance_for_Mapping_Evapotranspiration_With_Internalized_Calibration_METRIC_-_Model)), el cual se basa en el modelo SEBAL ([Bastiaanssen et al., 1998](https://www.sciencedirect.com/science/article/abs/pii/S0022169498002534)), cuya formulación posee como fundamento la ecuación de balance energía superficial. 
+El presente repositorio alberga el código usado para generar mapas de  evapotranspiración, en este caso para cultivos de arroz ubicados en el distrito de Ferreñafe, usando el modelo METRIC ([Allen et al., 2007](https://www.researchgate.net/publication/228615269_Satellite-Based_Energy_Balance_for_Mapping_Evapotranspiration_With_Internalized_Calibration_METRIC_-_Model)), el cual se basa en el modelo SEBAL ([Bastiaanssen et al., 1998](https://www.sciencedirect.com/science/article/abs/pii/S0022169498002534)), cuya formulación posee como fundamento la ecuación de balance energía superficial. 
 
-<img src="figures/mapa-articulo.jpg" alt="Zona de trabajo" width='80%'/>
+<img src="figures/Mapa Ubicacion.png" alt="Zona de trabajo" width='80%'/>
 
 Ubicación de la región Lambayeque en la costa norte del Perú (a), ubicación de la zona de estudio en la provincia y distrito Ferreñafe, región Lambayeque (b), y su delimitación en el Fundo Zapote Figueroa (c). Ciclo de cultivo enero-junio 2022. 
 
@@ -19,8 +19,15 @@ Ubicación de la región Lambayeque en la costa norte del Perú (a), ubicación 
 
 Resultados obtenidos del modelo METRIC para las fechas evaluadas. 
 
+## Proceso para generar mapas de ET
+Para generar mapas de evapotranspiración (ET) con el modelo METRIC es necesario obtener los siguientes inputs:
+1. **Lista de ID's de imágenes Landsat**: Para el rango temporal de evaluación se filtran las imágenes de la colección de imágenes Landsat con el objetivo de obtener una lista de ID's a procesar posteriormente.La libreta `1_Explorar_imagenes_local.ipynb`.
+2. **Datos meteorológicos**: La libreta `2_Explorar_datos_estacion.ipynb` se usa para obtener los datos meteorológicos para cada fecha y hora de evaluación (generalmente 11 am.) a partir de un archivo `.csv` de estación meteorológica.
+3. **Coordenadas de pixeles fríos y pixeles calientes**: Para las fechas que dispongan de imagen satelital Landsat se requiere la selección de pixeles, proceso realizado en la libreta `3_Seleccion_pixeles.ipynb`.
 
-## Código de Python
+Los inputs mencionados son incorporados en la libreta final de nombre `5_Modelo_Metric.ipynb`. La libreta `4_Proceso_Iterativo.ipynb` representa la replicación del archivo Excel del proceso iterativo para H.
+
+### Código de Python
 
 En GitHub:
 - Carpeta [`notebooks`](https://github.com/vilcagamarracf/Inv_arroz_METRIC/tree/main/notebooks)
