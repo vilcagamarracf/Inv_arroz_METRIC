@@ -21,8 +21,8 @@ Resultados obtenidos del modelo METRIC para las fechas evaluadas.
 
 ## Proceso para generar mapas de ET
 Para generar mapas de evapotranspiración (ET) con el modelo METRIC es necesario obtener los siguientes inputs:
-1. **Lista de ID's de imágenes Landsat**: Para el rango temporal de evaluación se filtran las imágenes de la colección de imágenes Landsat con el objetivo de obtener una lista de ID's a procesar posteriormente.La libreta `1_Explorar_imagenes_local.ipynb`.
-2. **Datos meteorológicos**: La libreta `2_Explorar_datos_estacion.ipynb` se usa para obtener los datos meteorológicos para cada fecha y hora de evaluación (generalmente 11 am.) a partir de un archivo `.csv` de estación meteorológica.
+1. **Lista de ID's de imágenes Landsat**: Para el rango temporal de evaluación se filtran las imágenes de la colección de imágenes Landsat con el objetivo de obtener una lista de ID's mediante la libreta `1_Explorar_imagenes_local.ipynb`.
+2. **Datos meteorológicos**: La libreta `2_Explorar_datos_estacion.ipynb` se usa para obtener los datos meteorológicos para cada fecha y hora de evaluación (11 am. aproximadamente para imágenes Landsat en UTC-5) a partir de un archivo `.csv` de estación meteorológica.
 3. **Coordenadas de pixeles fríos y pixeles calientes**: Para las fechas que dispongan de imagen satelital Landsat se requiere la selección de pixeles, proceso realizado en la libreta `3_Seleccion_pixeles.ipynb`.
 
 Los inputs mencionados son incorporados en la libreta final de nombre `5_Modelo_Metric.ipynb`. La libreta `4_Proceso_Iterativo.ipynb` representa la replicación del archivo Excel del proceso iterativo para H.
